@@ -2,16 +2,112 @@
 title: "Joshua Burrows Project 2"
 date: "16 October 2020"
 output: 
-  rmarkdown::github_document: 
+  github_document: 
     toc: TRUE
 ---
 
+```{r Setup, include = FALSE}
+library(knitr)
+library(rmarkdown)
+library(tidyverse)
+library(caret)
+opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = TRUE)
+```
+
+# Introduction
+
+# Read in Data 
+
+```{r Read}
+bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
+
+bikes$season <- as.factor(bikes$season)
+levels(bikes$season) <- c("winter", "spring", "summer", "fall")
+
+bikes$yr <- bikes %>% transmute(yr = ifelse(bikes$yr == 0, 2011, 2012)) %>% unlist()
+
+bikes$mnth <- as.factor(bikes$mnth)
+levels(bikes$mnth) <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+
+bikes$weathersit <- as.factor(bikes$weathersit)
+levels(bikes$weathersit) <- c("very good", "good", "bad", "very bad")
 
 
+bikes %>% head()
+```
+
+# Data 
+
+```{r Split}
+mon <- bikes %>% filter(weekday == 1)
+mon %>% head()
+
+set.seed(123)
+monIndex <- createDataPartition(mon$cnt, p = .7, list = FALSE)
+```
+
+## EDA 
+
+```{r Season}
+seasonSum <- mon %>% group_by(season) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
+
+seasonSum %>% kable()
+```
+
+```{r Year}
+yearSum <- mon %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
+yearSum
+```
+
+```{r Month}
+monthSum <- mon %>% group_by(mnth) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
+
+monthSum %>% kable()
+```
+
+```{r Hour}
+avgRentals <- mon %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
+
+ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point()
+```
+
+```{r Holiday}
+mon %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt))
+```
 
 
+```{r Workingday}
+mon %>% group_by(workingday) %>% summarize(meanRentals = mean(cnt))
+```
+
+```{r Weather}
+mon %>% group_by(weathersit) %>% summarize(meanRentals = mean(cnt))
+```
+
+```{r Temp}
+tempAvg <- mon %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point()
+```
+
+```{r aTemp}
+atempAvg <- mon %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point()
+```
 
 
+```{r Hum}
+humAvg <- mon %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point()
+```
+
+```{r Wind}
+windAvg <- mon %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point()
+```
 
 
 
