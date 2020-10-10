@@ -25,6 +25,8 @@ document for each day of the week.
 
 # Introduction
 
+The day is Sunday.
+
 # Read in Data
 
 ``` r
@@ -159,7 +161,7 @@ avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
 ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") 
 ```
 
-![](README_files/figure-gfm/Hour-1.png)<!-- -->
+![](Sunday_files/figure-gfm/Hour-1.png)<!-- -->
 
 Average rentals by holiday
 
@@ -203,7 +205,7 @@ tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
 ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", "Average Rentals")
 ```
 
-![](README_files/figure-gfm/Temp-1.png)<!-- -->
+![](Sunday_files/figure-gfm/Temp-1.png)<!-- -->
 
 Scatter plot of average rentals and feeling temperature. It does not
 make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from
@@ -215,7 +217,7 @@ atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
 ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", "Average Rentals")
 ```
 
-![](README_files/figure-gfm/aTemp-1.png)<!-- -->
+![](Sunday_files/figure-gfm/aTemp-1.png)<!-- -->
 
 Scatter plot of average rentals by humidity
 
@@ -225,7 +227,7 @@ humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
 ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") 
 ```
 
-![](README_files/figure-gfm/Hum-1.png)<!-- -->
+![](Sunday_files/figure-gfm/Hum-1.png)<!-- -->
 
 Average rentals by windspeed
 
@@ -235,7 +237,7 @@ windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
 ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals")
 ```
 
-![](README_files/figure-gfm/Wind-1.png)<!-- -->
+![](Sunday_files/figure-gfm/Wind-1.png)<!-- -->
 
 ### Correlation between Predictors
 
@@ -250,7 +252,7 @@ corr <- dayData %>% select(temp, atemp, windspeed, hum) %>% cor()
 corrplot(corr)
 ```
 
-![](README_files/figure-gfm/Correlation-1.png)<!-- -->
+![](Sunday_files/figure-gfm/Correlation-1.png)<!-- -->
 
 # Train Models
 

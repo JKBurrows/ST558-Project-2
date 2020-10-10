@@ -25,6 +25,8 @@ document for each day of the week.
 
 # Introduction
 
+The day is Tuesday.
+
 # Read in Data
 
 ``` r
@@ -77,12 +79,12 @@ dayData %>% head()
     ## # A tibble: 6 x 17
     ##   instant dteday     season yr    mnth 
     ##     <dbl> <date>     <fct>  <fct> <fct>
-    ## 1      25 2011-01-02 winter 2011  jan  
-    ## 2      26 2011-01-02 winter 2011  jan  
-    ## 3      27 2011-01-02 winter 2011  jan  
-    ## 4      28 2011-01-02 winter 2011  jan  
-    ## 5      29 2011-01-02 winter 2011  jan  
-    ## 6      30 2011-01-02 winter 2011  jan  
+    ## 1      70 2011-01-04 winter 2011  jan  
+    ## 2      71 2011-01-04 winter 2011  jan  
+    ## 3      72 2011-01-04 winter 2011  jan  
+    ## 4      73 2011-01-04 winter 2011  jan  
+    ## 5      74 2011-01-04 winter 2011  jan  
+    ## 6      75 2011-01-04 winter 2011  jan  
     ## # ... with 12 more variables: hr <dbl>,
     ## #   holiday <fct>, weekday <fct>,
     ## #   workingday <dbl>, weathersit <fct>,
@@ -107,12 +109,12 @@ seasonSum <- dayData %>% group_by(season) %>% summarize(min = min(cnt), Q1 = qua
 seasonSum %>% kable()
 ```
 
-| season | min | Q1 | median |      mean |     Q3 | max |
-| :----- | --: | -: | -----: | --------: | -----: | --: |
-| winter |   1 | 20 |   59.0 |  94.34953 | 126.75 | 554 |
-| spring |   2 | 47 |  143.0 | 208.10594 | 358.00 | 686 |
-| summer |   1 | 73 |  186.0 | 224.36143 | 356.00 | 757 |
-| fall   |   1 | 50 |  125.5 | 185.49840 | 293.50 | 776 |
+| season | min |   Q1 | median |     mean |     Q3 | max |
+| :----- | --: | ---: | -----: | -------: | -----: | --: |
+| winter |   1 | 23.5 |   85.0 | 122.2644 | 170.00 | 801 |
+| spring |   1 | 35.0 |  159.5 | 201.0401 | 285.25 | 850 |
+| summer |   1 | 57.0 |  192.0 | 236.0355 | 328.00 | 970 |
+| fall   |   1 | 40.0 |  157.0 | 198.2520 | 289.00 | 967 |
 
 Total rentals each year
 
@@ -123,8 +125,8 @@ yearSum %>% kable()
 
 | yr   | totalRentals |
 | :--- | -----------: |
-| 2011 |       177074 |
-| 2012 |       266953 |
+| 2011 |       180338 |
+| 2012 |       288771 |
 
 Summary statistics of rental count by dayDatath. It is probably not
 worth including *dayDatath* and *season* in the model, so I eliminated
@@ -136,20 +138,20 @@ dayDatathSum <- dayData %>% group_by(mnth) %>% summarize(min = min(cnt), Q1 = qu
 dayDatathSum %>% kable()
 ```
 
-| mnth | min |    Q1 | median |      mean |     Q3 | max |
-| :--- | --: | ----: | -----: | --------: | -----: | --: |
-| jan  |   1 | 18.00 |   55.0 |  76.62025 | 105.00 | 351 |
-| feb  |   1 | 23.00 |   63.0 |  95.13228 | 154.00 | 353 |
-| mar  |   2 | 23.00 |   78.5 | 140.46809 | 218.75 | 554 |
-| apr  |   3 | 36.00 |   95.5 | 184.03704 | 304.50 | 681 |
-| may  |   5 | 63.25 |  169.5 | 221.67593 | 366.25 | 637 |
-| jun  |   6 | 85.50 |  209.5 | 247.51562 | 396.25 | 686 |
-| jul  |   1 | 90.75 |  189.5 | 220.75417 | 346.00 | 628 |
-| aug  |   1 | 66.00 |  183.0 | 203.37297 | 313.00 | 626 |
-| sep  |   1 | 78.25 |  187.5 | 256.64815 | 403.25 | 776 |
-| oct  |   3 | 53.25 |  132.0 | 197.28704 | 322.75 | 675 |
-| nov  |   2 | 43.75 |  121.5 | 171.92188 | 276.25 | 724 |
-| dec  |   1 | 27.50 |   85.0 | 114.69302 | 171.50 | 520 |
+| mnth | min |    Q1 | median |     mean |     Q3 | max |
+| :--- | --: | ----: | -----: | -------: | -----: | --: |
+| jan  |   1 | 27.25 |   83.0 | 116.7172 | 168.75 | 559 |
+| feb  |   1 | 29.50 |   86.0 | 123.4536 | 172.00 | 559 |
+| mar  |   1 | 25.50 |  104.0 | 149.6093 | 220.50 | 801 |
+| apr  |   1 | 29.50 |  132.0 | 189.8281 | 277.50 | 800 |
+| may  |   2 | 37.50 |  175.0 | 209.3750 | 286.25 | 785 |
+| jun  |   2 | 54.00 |  189.5 | 236.7031 | 328.50 | 900 |
+| jul  |   2 | 72.00 |  200.0 | 243.5093 | 334.00 | 877 |
+| aug  |   3 | 63.00 |  208.5 | 247.1019 | 343.25 | 878 |
+| sep  |   1 | 45.50 |  172.0 | 217.1518 | 304.00 | 970 |
+| oct  |   1 | 60.50 |  180.0 | 224.5369 | 317.50 | 943 |
+| nov  |   1 | 27.50 |  136.5 | 168.3426 | 242.00 | 665 |
+| dec  |   1 | 24.50 |  107.0 | 155.5288 | 242.00 | 743 |
 
 Scatter plot of total rentals by hour of the day
 
@@ -159,7 +161,7 @@ avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
 ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") 
 ```
 
-![](README_files/figure-gfm/Hour-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/Hour-1.png)<!-- -->
 
 Average rentals by holiday
 
@@ -169,7 +171,8 @@ dayData %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt)) %>% kable()
 
 | holiday | meanRentals |
 | :------ | ----------: |
-| no      |    177.4688 |
+| no      |   192.63210 |
+| yes     |    44.04348 |
 
 Average rentals by working day. Working days are neither weekends nor
 holidays. I decided to eliminate this variable from the model because
@@ -181,7 +184,8 @@ dayData %>% group_by(workingday) %>% summarize(meanRentals = mean(cnt)) %>% kabl
 
 | workingday | meanRentals |
 | ---------: | ----------: |
-|          0 |    177.4688 |
+|          0 |    44.04348 |
+|          1 |   192.63210 |
 
 Average rentals by weather condition
 
@@ -191,9 +195,9 @@ dayData %>% group_by(weathersit) %>% summarize(meanRentals = mean(cnt)) %>% kabl
 
 | weathersit | meanRentals |
 | :--------- | ----------: |
-| very good  |    194.6703 |
-| good       |    142.1778 |
-| bad        |    116.4320 |
+| very good  |    214.8364 |
+| good       |    164.7133 |
+| bad        |    117.3713 |
 
 Scatter plot of average rentals and temperature
 
@@ -203,7 +207,7 @@ tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
 ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", "Average Rentals")
 ```
 
-![](README_files/figure-gfm/Temp-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/Temp-1.png)<!-- -->
 
 Scatter plot of average rentals and feeling temperature. It does not
 make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from
@@ -215,7 +219,7 @@ atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
 ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", "Average Rentals")
 ```
 
-![](README_files/figure-gfm/aTemp-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/aTemp-1.png)<!-- -->
 
 Scatter plot of average rentals by humidity
 
@@ -225,7 +229,7 @@ humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
 ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") 
 ```
 
-![](README_files/figure-gfm/Hum-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/Hum-1.png)<!-- -->
 
 Average rentals by windspeed
 
@@ -235,7 +239,7 @@ windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
 ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals")
 ```
 
-![](README_files/figure-gfm/Wind-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/Wind-1.png)<!-- -->
 
 ### Correlation between Predictors
 
@@ -250,7 +254,7 @@ corr <- dayData %>% select(temp, atemp, windspeed, hum) %>% cor()
 corrplot(corr)
 ```
 
-![](README_files/figure-gfm/Correlation-1.png)<!-- -->
+![](Tuesday_files/figure-gfm/Correlation-1.png)<!-- -->
 
 # Train Models
 
@@ -266,16 +270,16 @@ trialTrain
     ## # A tibble: 100 x 17
     ##    instant dteday     season yr    mnth 
     ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17174 2012-12-23 winter 2012  dec  
-    ##  2   15536 2012-10-14 fall   2012  oct  
-    ##  3    3633 2011-06-05 spring 2011  jun  
-    ##  4    1300 2011-02-27 winter 2011  feb  
-    ##  5   12847 2012-06-24 summer 2012  jun  
-    ##  6    7982 2011-12-04 fall   2011  dec  
-    ##  7    8667 2012-01-01 winter 2012  jan  
-    ##  8    8825 2012-01-08 winter 2012  jan  
-    ##  9    7159 2011-10-30 fall   2011  oct  
-    ## 10    4636 2011-07-17 summer 2011  jul  
+    ##  1   15595 2012-10-16 fall   2012  oct  
+    ##  2    3697 2011-06-07 spring 2011  jun  
+    ##  3    1506 2011-03-08 winter 2011  mar  
+    ##  4   12906 2012-06-26 summer 2012  jun  
+    ##  5    8040 2011-12-06 fall   2011  dec  
+    ##  6    8867 2012-01-10 winter 2012  jan  
+    ##  7    8882 2012-01-10 winter 2012  jan  
+    ##  8    7361 2011-11-08 fall   2011  nov  
+    ##  9    4700 2011-07-19 summer 2011  jul  
+    ## 10   11395 2012-04-24 spring 2012  apr  
     ## # ... with 90 more rows, and 12 more
     ## #   variables: hr <dbl>, holiday <fct>,
     ## #   weekday <fct>, workingday <dbl>,
@@ -293,16 +297,16 @@ trialTest
     ## # A tibble: 50 x 17
     ##    instant dteday     season yr    mnth 
     ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17185 2012-12-23 winter 2012  dec  
-    ##  2    7150 2011-10-30 fall   2011  oct  
-    ##  3    2138 2011-04-03 spring 2011  apr  
-    ##  4   13681 2012-07-29 summer 2012  jul  
-    ##  5    8819 2012-01-08 winter 2012  jan  
-    ##  6   12505 2012-06-10 spring 2012  jun  
-    ##  7    9494 2012-02-05 winter 2012  feb  
-    ##  8    6819 2011-10-16 fall   2011  oct  
-    ##  9   14532 2012-09-02 summer 2012  sep  
-    ## 10    6820 2011-10-16 fall   2011  oct  
+    ##  1   13740 2012-07-31 summer 2012  jul  
+    ##  2    8876 2012-01-10 winter 2012  jan  
+    ##  3   12564 2012-06-12 spring 2012  jun  
+    ##  4    9552 2012-02-07 winter 2012  feb  
+    ##  5    7020 2011-10-25 fall   2011  oct  
+    ##  6   14735 2012-09-11 summer 2012  sep  
+    ##  7    7021 2011-10-25 fall   2011  oct  
+    ##  8    1026 2011-02-15 winter 2011  feb  
+    ##  9   12394 2012-06-05 spring 2012  jun  
+    ## 10   11208 2012-04-17 spring 2012  apr  
     ## # ... with 40 more rows, and 12 more
     ## #   variables: hr <dbl>, holiday <fct>,
     ## #   weekday <fct>, workingday <dbl>,
@@ -330,20 +334,20 @@ tree
     ## Summary of sample sizes: 99, 99, 99, 99, 99, 99, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   cp         RMSE      Rsquared  
-    ##   0.1513697  143.6789  0.27880562
-    ##   0.2066004  167.1026  0.08931582
-    ##   0.3524401  171.7707  0.01222900
+    ##   cp          RMSE      Rsquared  
+    ##   0.09020345  154.4861  0.26814171
+    ##   0.19200236  174.8631  0.09363696
+    ##   0.21474198  182.2383  0.01044437
     ##   MAE     
-    ##   111.7920
-    ##   134.8903
-    ##   154.4611
+    ##   107.6569
+    ##   130.0359
+    ##   144.2623
     ## 
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.
     ## The final value used for the model
-    ##  was cp = 0.1513697.
+    ##  was cp = 0.09020345.
 
 ## Boosted Tree
 
@@ -367,26 +371,26 @@ boostTree
     ## Summary of sample sizes: 99, 99, 99, 99, 99, 99, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   n.trees  interaction.depth  RMSE    
-    ##    50      1                  99.97631
-    ##    50      2                  84.88782
-    ##    50      3                  79.82056
-    ##   100      1                  91.22898
-    ##   100      2                  81.57838
-    ##   100      3                  78.92905
-    ##   150      1                  89.08780
-    ##   150      2                  79.18490
-    ##   150      3                  79.33817
+    ##   n.trees  interaction.depth  RMSE     
+    ##    50      1                  136.93067
+    ##    50      2                  123.24292
+    ##    50      3                  111.04237
+    ##   100      1                  128.81563
+    ##   100      2                  104.44234
+    ##   100      3                   98.29858
+    ##   150      1                  120.28131
+    ##   150      2                   97.57137
+    ##   150      3                   94.06494
     ##   Rsquared   MAE     
-    ##   0.6230842  77.08080
-    ##   0.7159370  65.02241
-    ##   0.7505534  60.46895
-    ##   0.6722638  70.86155
-    ##   0.7374595  62.79495
-    ##   0.7538659  59.64442
-    ##   0.6860800  69.97736
-    ##   0.7521686  60.87301
-    ##   0.7514352  59.68463
+    ##   0.4257408  94.98798
+    ##   0.5334416  85.49903
+    ##   0.6305317  77.40064
+    ##   0.4874594  89.22285
+    ##   0.6684128  76.51533
+    ##   0.7002202  72.10927
+    ##   0.5532146  83.79544
+    ##   0.7046891  71.81563
+    ##   0.7189826  68.81512
     ## 
     ## Tuning parameter 'shrinkage' was
     ## 
@@ -435,26 +439,26 @@ final
     ## Summary of sample sizes: 99, 99, 99, 99, 99, 99, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   n.trees  interaction.depth  RMSE    
-    ##    50      1                  99.97631
-    ##    50      2                  84.88782
-    ##    50      3                  79.82056
-    ##   100      1                  91.22898
-    ##   100      2                  81.57838
-    ##   100      3                  78.92905
-    ##   150      1                  89.08780
-    ##   150      2                  79.18490
-    ##   150      3                  79.33817
+    ##   n.trees  interaction.depth  RMSE     
+    ##    50      1                  136.93067
+    ##    50      2                  123.24292
+    ##    50      3                  111.04237
+    ##   100      1                  128.81563
+    ##   100      2                  104.44234
+    ##   100      3                   98.29858
+    ##   150      1                  120.28131
+    ##   150      2                   97.57137
+    ##   150      3                   94.06494
     ##   Rsquared   MAE     
-    ##   0.6230842  77.08080
-    ##   0.7159370  65.02241
-    ##   0.7505534  60.46895
-    ##   0.6722638  70.86155
-    ##   0.7374595  62.79495
-    ##   0.7538659  59.64442
-    ##   0.6860800  69.97736
-    ##   0.7521686  60.87301
-    ##   0.7514352  59.68463
+    ##   0.4257408  94.98798
+    ##   0.5334416  85.49903
+    ##   0.6305317  77.40064
+    ##   0.4874594  89.22285
+    ##   0.6684128  76.51533
+    ##   0.7002202  72.10927
+    ##   0.5532146  83.79544
+    ##   0.7046891  71.81563
+    ##   0.7189826  68.81512
     ## 
     ## Tuning parameter 'shrinkage' was
     ## 
