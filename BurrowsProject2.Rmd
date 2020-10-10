@@ -4,6 +4,8 @@ date: "16 October 2020"
 output: 
   github_document: 
     toc: TRUE
+params: 
+  
 ---
 
 ```{r Setup, include = FALSE}
@@ -11,6 +13,7 @@ library(knitr)
 library(rmarkdown)
 library(tidyverse)
 library(caret)
+library(corrplot)
 opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = TRUE)
 ```
 
@@ -24,7 +27,8 @@ bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
 bikes$season <- as.factor(bikes$season)
 levels(bikes$season) <- c("winter", "spring", "summer", "fall")
 
-bikes$yr <- bikes %>% transmute(yr = ifelse(bikes$yr == 0, 2011, 2012)) %>% unlist()
+bikes$yr <- as.factor(bikes$yr)
+levels(bikes$yr) <- c("2011", "2012")
 
 bikes$mnth <- as.factor(bikes$mnth)
 levels(bikes$mnth) <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
@@ -32,6 +36,8 @@ levels(bikes$mnth) <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", 
 bikes$weathersit <- as.factor(bikes$weathersit)
 levels(bikes$weathersit) <- c("very good", "good", "bad", "very bad")
 
+bikes$holiday <- as.factor(bikes$holiday)
+levels(bikes$holiday) <- c("no", "yes")
 
 bikes %>% head()
 ```
@@ -48,16 +54,24 @@ monIndex <- createDataPartition(mon$cnt, p = .7, list = FALSE)
 
 ## EDA 
 
+### Predictor Summaries and Plots
+
+Summary statistics of rental count by season
+
 ```{r Season}
 seasonSum <- mon %>% group_by(season) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
 
 seasonSum %>% kable()
 ```
 
+Total rentals each year 
+
 ```{r Year}
 yearSum <- mon %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
-yearSum
+yearSum %>% kable()
 ```
+
+Summary statistics of rental count by month. It is probably not worth including *month* and *season* in the model, so I eliminated *season*. 
 
 ```{r Month}
 monthSum <- mon %>% group_by(mnth) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
@@ -65,59 +79,146 @@ monthSum <- mon %>% group_by(mnth) %>% summarize(min = min(cnt), Q1 = quantile(c
 monthSum %>% kable()
 ```
 
+Scatter plot of total rentals by hour of the day
+
 ```{r Hour}
 avgRentals <- mon %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
 
-ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point()
+ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") 
 ```
+
+Average rentals by holiday 
 
 ```{r Holiday}
-mon %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt))
+mon %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt)) 
+
+%>% kable()
 ```
 
+Average rentals by working day. Working days are neither weekends nor holidays. I decided to eliminate this variable from the model because some of the days under consideration are weekends. 
 
 ```{r Workingday}
-mon %>% group_by(workingday) %>% summarize(meanRentals = mean(cnt))
+mon %>% group_by(workingday) %>% summarize(meanRentals = mean(cnt)) %>% kable()
 ```
 
+Average rentals by weather condition
+
 ```{r Weather}
-mon %>% group_by(weathersit) %>% summarize(meanRentals = mean(cnt))
+mon %>% group_by(weathersit) %>% summarize(meanRentals = mean(cnt)) %>% kable()
 ```
+
+Scatter plot of average rentals and temperature
 
 ```{r Temp}
 tempAvg <- mon %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
 
-ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point()
+ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", "Average Rentals")
 ```
+
+Scatter plot of average rentals and feeling temperature. It does not make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from the model. 
 
 ```{r aTemp}
 atempAvg <- mon %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
 
-ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point()
+ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", "Average Rentals")
 ```
 
+Scatter plot of average rentals by humidity 
 
 ```{r Hum}
 humAvg <- mon %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
 
-ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point()
+ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") 
 ```
+
+Average rentals by windspeed
 
 ```{r Wind}
 windAvg <- mon %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
 
-ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point()
+ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals")
 ```
 
+### Correlation between Predictors 
+
+Correlation plot of quantitative predictors. 
+
+It does not make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from the model. 
+
+```{r Correlation}
+corr <- mon %>% select(temp, atemp, windspeed, hum) %>% cor()
+
+corrplot(corr)
+
+```
+
+# Train Models
+
+## Tree
+
+```{r Tree}
+set.seed(123)
+trialTrainIndex <- sample(1:nrow(mon), size = 100)
+trialTrain <- mon[trialTrainIndex,]
+trialTrain
+
+trialTestIndex <- sample(1:nrow(mon), size = 50)
+trialTest <- mon[trialTestIndex,]
+trialTest
 
 
 
+set.seed(123)
+tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+              data = trialTrain, 
+              method = "rpart", 
+              trControl = trainControl(method = "LOOCV"))
+tree
+```
 
+## Boosted Tree 
 
+```{r Boosted Tree}
+set.seed(123)
+boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+                   data = trialTrain, 
+                   method = "gbm", 
+                   trControl = trainControl(method = "LOOCV"), 
+                   verbose = FALSE)
+boostTree
+```
 
+# Test Models 
 
+## Tree
 
+```{r Test Tree}
+treePreds <- predict(tree, trialTrain)
+treeRMSE <- postResample(treePreds, trialTrain$cnt)[1]
 
+boostPreds <- predict(boostTree, trialTrain)
+boostRMSE <- postResample(boostPreds, trialTrain$cnt)[1]
+
+modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), RMSE = c(treeRMSE, boostRMSE))
+
+best <- modelPerformance %>% filter(RMSE == min(RMSE))
+
+if(best$model == "Non-Ensemble Tree"){
+  final <- tree
+} else if(best$model == "Boosted Tree"){
+  final <- boostTree
+} else{
+  stop("Error")
+}
+
+final
+```
+
+# Best Model
+
+```{r}
+
+```
 
 
 
