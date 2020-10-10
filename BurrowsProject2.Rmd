@@ -4,8 +4,6 @@ date: "16 October 2020"
 output: 
   github_document: 
     toc: TRUE
-params: 
-  
 ---
 
 ```{r Setup, include = FALSE}
@@ -14,7 +12,7 @@ library(rmarkdown)
 library(tidyverse)
 library(caret)
 library(corrplot)
-opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = TRUE)
+opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # Introduction
@@ -90,9 +88,7 @@ ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "
 Average rentals by holiday 
 
 ```{r Holiday}
-mon %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt)) 
-
-%>% kable()
+mon %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt)) %>% kable()
 ```
 
 Average rentals by working day. Working days are neither weekends nor holidays. I decided to eliminate this variable from the model because some of the days under consideration are weekends. 
