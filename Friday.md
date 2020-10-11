@@ -62,10 +62,11 @@ bikes %>% head()
     ## 4       4 2011-01-01 winter 2011  jan  
     ## 5       5 2011-01-01 winter 2011  jan  
     ## 6       6 2011-01-01 winter 2011  jan  
-    ## # ... with 12 more variables: hr <dbl>,
-    ## #   holiday <fct>, weekday <fct>,
-    ## #   workingday <dbl>, weathersit <fct>,
-    ## #   temp <dbl>, atemp <dbl>, hum <dbl>,
+    ## # ... with 12 more variables:
+    ## #   hr <dbl>, holiday <fct>,
+    ## #   weekday <fct>, workingday <dbl>,
+    ## #   weathersit <fct>, temp <dbl>,
+    ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
     ## #   registered <dbl>, cnt <dbl>
 
@@ -85,10 +86,11 @@ dayData %>% head()
     ## 4     142 2011-01-07 winter 2011  jan  
     ## 5     143 2011-01-07 winter 2011  jan  
     ## 6     144 2011-01-07 winter 2011  jan  
-    ## # ... with 12 more variables: hr <dbl>,
-    ## #   holiday <fct>, weekday <fct>,
-    ## #   workingday <dbl>, weathersit <fct>,
-    ## #   temp <dbl>, atemp <dbl>, hum <dbl>,
+    ## # ... with 12 more variables:
+    ## #   hr <dbl>, holiday <fct>,
+    ## #   weekday <fct>, workingday <dbl>,
+    ## #   weathersit <fct>, temp <dbl>,
+    ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
     ## #   registered <dbl>, cnt <dbl>
 
@@ -268,21 +270,22 @@ trialTrain
 ```
 
     ## # A tibble: 100 x 17
-    ##    instant dteday     season yr    mnth 
-    ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17141 2012-12-21 winter 2012  dec  
-    ##  2   15647 2012-10-19 fall   2012  oct  
-    ##  3    3753 2011-06-10 spring 2011  jun  
-    ##  4    1419 2011-03-04 winter 2011  mar  
-    ##  5   12958 2012-06-29 summer 2012  jun  
-    ##  6    7951 2011-12-02 fall   2011  dec  
-    ##  7    8778 2012-01-06 winter 2012  jan  
-    ##  8    8936 2012-01-13 winter 2012  jan  
-    ##  9    7272 2011-11-04 fall   2011  nov  
-    ## 10    4756 2011-07-22 summer 2011  jul  
-    ## # ... with 90 more rows, and 12 more
-    ## #   variables: hr <dbl>, holiday <fct>,
-    ## #   weekday <fct>, workingday <dbl>,
+    ##    instant dteday     season yr   
+    ##      <dbl> <date>     <fct>  <fct>
+    ##  1   17141 2012-12-21 winter 2012 
+    ##  2   15647 2012-10-19 fall   2012 
+    ##  3    3753 2011-06-10 spring 2011 
+    ##  4    1419 2011-03-04 winter 2011 
+    ##  5   12958 2012-06-29 summer 2012 
+    ##  6    7951 2011-12-02 fall   2011 
+    ##  7    8778 2012-01-06 winter 2012 
+    ##  8    8936 2012-01-13 winter 2012 
+    ##  9    7272 2011-11-04 fall   2011 
+    ## 10    4756 2011-07-22 summer 2011 
+    ## # ... with 90 more rows, and 13 more
+    ## #   variables: mnth <fct>, hr <dbl>,
+    ## #   holiday <fct>, weekday <fct>,
+    ## #   workingday <dbl>,
     ## #   weathersit <fct>, temp <dbl>,
     ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
@@ -295,21 +298,22 @@ trialTest
 ```
 
     ## # A tibble: 50 x 17
-    ##    instant dteday     season yr    mnth 
-    ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17294 2012-12-28 winter 2012  dec  
-    ##  2    7263 2011-11-04 fall   2011  nov  
-    ##  3    2258 2011-04-08 spring 2011  apr  
-    ##  4   13648 2012-07-27 summer 2012  jul  
-    ##  5    8787 2012-01-06 winter 2012  jan  
-    ##  6   12472 2012-06-08 spring 2012  jun  
-    ##  7    9605 2012-02-10 winter 2012  feb  
-    ##  8    6931 2011-10-21 fall   2011  oct  
-    ##  9   14643 2012-09-07 summer 2012  sep  
-    ## 10    6932 2011-10-21 fall   2011  oct  
-    ## # ... with 40 more rows, and 12 more
-    ## #   variables: hr <dbl>, holiday <fct>,
-    ## #   weekday <fct>, workingday <dbl>,
+    ##    instant dteday     season yr   
+    ##      <dbl> <date>     <fct>  <fct>
+    ##  1   17294 2012-12-28 winter 2012 
+    ##  2    7263 2011-11-04 fall   2011 
+    ##  3    2258 2011-04-08 spring 2011 
+    ##  4   13648 2012-07-27 summer 2012 
+    ##  5    8787 2012-01-06 winter 2012 
+    ##  6   12472 2012-06-08 spring 2012 
+    ##  7    9605 2012-02-10 winter 2012 
+    ##  8    6931 2011-10-21 fall   2011 
+    ##  9   14643 2012-09-07 summer 2012 
+    ## 10    6932 2011-10-21 fall   2011 
+    ## # ... with 40 more rows, and 13 more
+    ## #   variables: mnth <fct>, hr <dbl>,
+    ## #   holiday <fct>, weekday <fct>,
+    ## #   workingday <dbl>,
     ## #   weathersit <fct>, temp <dbl>,
     ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
@@ -371,31 +375,30 @@ boostTree
     ## Summary of sample sizes: 99, 99, 99, 99, 99, 99, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   n.trees  interaction.depth  RMSE     
-    ##    50      1                  121.42028
-    ##    50      2                  107.19387
-    ##    50      3                  103.93042
-    ##   100      1                  118.08235
-    ##   100      2                   99.38078
-    ##   100      3                   97.15211
-    ##   150      1                  114.44999
-    ##   150      2                   96.49161
-    ##   150      3                   94.99217
-    ##   Rsquared   MAE     
-    ##   0.4676770  86.00150
-    ##   0.5854284  69.39815
-    ##   0.6103958  66.42171
-    ##   0.4907530  82.43269
-    ##   0.6421721  64.05445
-    ##   0.6566731  63.51762
-    ##   0.5210626  78.76234
-    ##   0.6599418  63.24206
-    ##   0.6704286  63.83941
+    ##   n.trees  interaction.depth
+    ##    50      1                
+    ##    50      2                
+    ##    50      3                
+    ##   100      1                
+    ##   100      2                
+    ##   100      3                
+    ##   150      1                
+    ##   150      2                
+    ##   150      3                
+    ##   RMSE       Rsquared   MAE     
+    ##   121.42028  0.4676770  86.00150
+    ##   107.19387  0.5854284  69.39815
+    ##   103.93042  0.6103958  66.42171
+    ##   118.08235  0.4907530  82.43269
+    ##    99.38078  0.6421721  64.05445
+    ##    97.15211  0.6566731  63.51762
+    ##   114.44999  0.5210626  78.76234
+    ##    96.49161  0.6599418  63.24206
+    ##    94.99217  0.6704286  63.83941
     ## 
     ## Tuning parameter 'shrinkage' was
-    ## 
-    ## Tuning parameter 'n.minobsinnode'
-    ##  was held constant at a value of 10
+    ##  'n.minobsinnode' was held constant
+    ##  at a value of 10
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.
@@ -439,31 +442,30 @@ final
     ## Summary of sample sizes: 99, 99, 99, 99, 99, 99, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   n.trees  interaction.depth  RMSE     
-    ##    50      1                  121.42028
-    ##    50      2                  107.19387
-    ##    50      3                  103.93042
-    ##   100      1                  118.08235
-    ##   100      2                   99.38078
-    ##   100      3                   97.15211
-    ##   150      1                  114.44999
-    ##   150      2                   96.49161
-    ##   150      3                   94.99217
-    ##   Rsquared   MAE     
-    ##   0.4676770  86.00150
-    ##   0.5854284  69.39815
-    ##   0.6103958  66.42171
-    ##   0.4907530  82.43269
-    ##   0.6421721  64.05445
-    ##   0.6566731  63.51762
-    ##   0.5210626  78.76234
-    ##   0.6599418  63.24206
-    ##   0.6704286  63.83941
+    ##   n.trees  interaction.depth
+    ##    50      1                
+    ##    50      2                
+    ##    50      3                
+    ##   100      1                
+    ##   100      2                
+    ##   100      3                
+    ##   150      1                
+    ##   150      2                
+    ##   150      3                
+    ##   RMSE       Rsquared   MAE     
+    ##   121.42028  0.4676770  86.00150
+    ##   107.19387  0.5854284  69.39815
+    ##   103.93042  0.6103958  66.42171
+    ##   118.08235  0.4907530  82.43269
+    ##    99.38078  0.6421721  64.05445
+    ##    97.15211  0.6566731  63.51762
+    ##   114.44999  0.5210626  78.76234
+    ##    96.49161  0.6599418  63.24206
+    ##    94.99217  0.6704286  63.83941
     ## 
     ## Tuning parameter 'shrinkage' was
-    ## 
-    ## Tuning parameter 'n.minobsinnode'
-    ##  was held constant at a value of 10
+    ##  'n.minobsinnode' was held constant
+    ##  at a value of 10
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.

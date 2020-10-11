@@ -62,10 +62,11 @@ bikes %>% head()
     ## 4       4 2011-01-01 winter 2011  jan  
     ## 5       5 2011-01-01 winter 2011  jan  
     ## 6       6 2011-01-01 winter 2011  jan  
-    ## # ... with 12 more variables: hr <dbl>,
-    ## #   holiday <fct>, weekday <fct>,
-    ## #   workingday <dbl>, weathersit <fct>,
-    ## #   temp <dbl>, atemp <dbl>, hum <dbl>,
+    ## # ... with 12 more variables:
+    ## #   hr <dbl>, holiday <fct>,
+    ## #   weekday <fct>, workingday <dbl>,
+    ## #   weathersit <fct>, temp <dbl>,
+    ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
     ## #   registered <dbl>, cnt <dbl>
 
@@ -85,10 +86,11 @@ dayData %>% head()
     ## 4      51 2011-01-03 winter 2011  jan  
     ## 5      52 2011-01-03 winter 2011  jan  
     ## 6      53 2011-01-03 winter 2011  jan  
-    ## # ... with 12 more variables: hr <dbl>,
-    ## #   holiday <fct>, weekday <fct>,
-    ## #   workingday <dbl>, weathersit <fct>,
-    ## #   temp <dbl>, atemp <dbl>, hum <dbl>,
+    ## # ... with 12 more variables:
+    ## #   hr <dbl>, holiday <fct>,
+    ## #   weekday <fct>, workingday <dbl>,
+    ## #   weathersit <fct>, temp <dbl>,
+    ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
     ## #   registered <dbl>, cnt <dbl>
 
@@ -269,21 +271,22 @@ trialTrain
 ```
 
     ## # A tibble: 100 x 17
-    ##    instant dteday     season yr    mnth 
-    ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17363 2012-12-31 winter 2012  dec  
-    ##  2   15559 2012-10-15 fall   2012  oct  
-    ##  3    3658 2011-06-06 spring 2011  jun  
-    ##  4    1321 2011-02-28 winter 2011  feb  
-    ##  5   12870 2012-06-25 summer 2012  jun  
-    ##  6    8002 2011-12-05 fall   2011  dec  
-    ##  7    8687 2012-01-02 winter 2012  jan  
-    ##  8    8846 2012-01-09 winter 2012  jan  
-    ##  9    7178 2011-10-31 fall   2011  oct  
-    ## 10    4661 2011-07-18 summer 2011  jul  
-    ## # ... with 90 more rows, and 12 more
-    ## #   variables: hr <dbl>, holiday <fct>,
-    ## #   weekday <fct>, workingday <dbl>,
+    ##    instant dteday     season yr   
+    ##      <dbl> <date>     <fct>  <fct>
+    ##  1   17363 2012-12-31 winter 2012 
+    ##  2   15559 2012-10-15 fall   2012 
+    ##  3    3658 2011-06-06 spring 2011 
+    ##  4    1321 2011-02-28 winter 2011 
+    ##  5   12870 2012-06-25 summer 2012 
+    ##  6    8002 2011-12-05 fall   2011 
+    ##  7    8687 2012-01-02 winter 2012 
+    ##  8    8846 2012-01-09 winter 2012 
+    ##  9    7178 2011-10-31 fall   2011 
+    ## 10    4661 2011-07-18 summer 2011 
+    ## # ... with 90 more rows, and 13 more
+    ## #   variables: mnth <fct>, hr <dbl>,
+    ## #   holiday <fct>, weekday <fct>,
+    ## #   workingday <dbl>,
     ## #   weathersit <fct>, temp <dbl>,
     ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
@@ -296,21 +299,22 @@ trialTest
 ```
 
     ## # A tibble: 50 x 17
-    ##    instant dteday     season yr    mnth 
-    ##      <dbl> <date>     <fct>  <fct> <fct>
-    ##  1   17374 2012-12-31 winter 2012  dec  
-    ##  2    7169 2011-10-31 fall   2011  oct  
-    ##  3    2162 2011-04-04 spring 2011  apr  
-    ##  4   13704 2012-07-30 summer 2012  jul  
-    ##  5    8840 2012-01-09 winter 2012  jan  
-    ##  6   12528 2012-06-11 spring 2012  jun  
-    ##  7    9515 2012-02-06 winter 2012  feb  
-    ##  8    6838 2011-10-17 fall   2011  oct  
-    ##  9   14555 2012-09-03 summer 2012  sep  
-    ## 10    6839 2011-10-17 fall   2011  oct  
-    ## # ... with 40 more rows, and 12 more
-    ## #   variables: hr <dbl>, holiday <fct>,
-    ## #   weekday <fct>, workingday <dbl>,
+    ##    instant dteday     season yr   
+    ##      <dbl> <date>     <fct>  <fct>
+    ##  1   17374 2012-12-31 winter 2012 
+    ##  2    7169 2011-10-31 fall   2011 
+    ##  3    2162 2011-04-04 spring 2011 
+    ##  4   13704 2012-07-30 summer 2012 
+    ##  5    8840 2012-01-09 winter 2012 
+    ##  6   12528 2012-06-11 spring 2012 
+    ##  7    9515 2012-02-06 winter 2012 
+    ##  8    6838 2011-10-17 fall   2011 
+    ##  9   14555 2012-09-03 summer 2012 
+    ## 10    6839 2011-10-17 fall   2011 
+    ## # ... with 40 more rows, and 13 more
+    ## #   variables: mnth <fct>, hr <dbl>,
+    ## #   holiday <fct>, weekday <fct>,
+    ## #   workingday <dbl>,
     ## #   weathersit <fct>, temp <dbl>,
     ## #   atemp <dbl>, hum <dbl>,
     ## #   windspeed <dbl>, casual <dbl>,
@@ -394,9 +398,8 @@ boostTree
     ##   0.5868665  75.84206
     ## 
     ## Tuning parameter 'shrinkage' was
-    ## 
-    ## Tuning parameter 'n.minobsinnode'
-    ##  was held constant at a value of 10
+    ##  'n.minobsinnode' was held constant
+    ##  at a value of 10
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.
@@ -462,9 +465,8 @@ final
     ##   0.5868665  75.84206
     ## 
     ## Tuning parameter 'shrinkage' was
-    ## 
-    ## Tuning parameter 'n.minobsinnode'
-    ##  was held constant at a value of 10
+    ##  'n.minobsinnode' was held constant
+    ##  at a value of 10
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.

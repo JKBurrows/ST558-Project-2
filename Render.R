@@ -1,6 +1,11 @@
 library(tidyverse)
 library(rmarkdown)
 
+# Generate ReadMe for homepage 
+
+render(input = "./BurrowsProject2HomePage.Rmd", output_file = "./README") 
+
+# Automate reports 
 bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
 
 days <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday") 
