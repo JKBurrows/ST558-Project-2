@@ -50,5 +50,5 @@ params = lapply(days, FUN = function(x){list(day = x)})
 
 reports <- tibble(output_file, params)
 
-apply(reports, MARGIN = 1, FUN = function(x){render(input = "./BurrowsProject2.Rmd", output_file = x[[1]], params = x[[2]])})
+apply(reports, MARGIN = 1, FUN = function(x){render(input = "./BurrowsProject2Analysis.Rmd", output_file = x[[1]], params = x[[2]])})
 ```

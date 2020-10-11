@@ -18,19 +18,44 @@ library(shiny)
 opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
-# Render Code 
+# `r params$day`: Introduction
 
-The following code runs in a separate R script to render a different document for each day of the week. 
+This document walks though the process of creating a model to predict the number of bikes that will be rented on `r paste0(tolower(params$day), "s")`.
 
-# Introduction
+I compared two models - a *non-ensemble tree* and a *boosted tree* - and picked the one that does better. These models use the following predictor variables: 
 
-The day is `r params$day`. 
+- yr: year (2011 or 2012)  
+- mnth: month  
+- hr: hour of the day  
+- holiday: whether the day is a holiday  
+- weathersit: weather condition  
+    + pleasant: clear, few clouds, partly cloudy  
+    + less pleasant: mist, mist + cloudy, mist + broken clouds, mist + few clouds  
+    + even less pleasant: light snow, light Rain + scattered clouds, light rain + thunderstorm + scattered clouds  
+    + downright unpleasant: snow + fog, heavy rain + ice pallets + thunderstorm + mist  
+- temp: normalized temperature in celsius  
+- hum: normalized humidity  
+- windspeed: normalized windspeed  
+
+You can return to the homepage for this project by clicking [here](README.md). 
 
 # Read in Data 
+
+## Get Bikes Data 
+
+Read in data that has been downloaded from [the UCI Machine Learning Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset). 
 
 ```{r Read}
 bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
 
+bikes %>% head() %>% kable()
+```
+
+## Factors 
+
+Convert categorical variables to factors. 
+
+```{r Factorize} 
 bikes$weekday <- as.factor(bikes$weekday)
 levels(bikes$weekday) <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday") 
 
@@ -44,114 +69,36 @@ bikes$mnth <- as.factor(bikes$mnth)
 levels(bikes$mnth) <- c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 
 bikes$weathersit <- as.factor(bikes$weathersit)
-levels(bikes$weathersit) <- c("very good", "good", "bad", "very bad")
+levels(bikes$weathersit) <- c("pleasant", "less pleasant", "even less pleasant", "downright unpleasant")
 
 bikes$holiday <- as.factor(bikes$holiday)
 levels(bikes$holiday) <- c("no", "yes")
 
-bikes %>% head()
+bikes$workingday <- as.factor(bikes$workingday)
+levels(bikes$workingday) <- c("no", "yes")
+
+bikes %>% head() %>% kable()
 ```
 
-# Data 
+## Split by Day 
+
+Grab the data for `r tolower(params$day)`. 
 
 ```{r Split}
 dayData <- bikes %>% filter(weekday == params$day)
-dayData %>% head()
 
-set.seed(123)
-dayIndex <- createDataPartition(dayData$cnt, p = .7, list = FALSE)
+dayData %>% head() %>% kable()
 ```
 
-## EDA 
+# Exploratory Data Analysis  
 
-### Predictor Summaries and Plots
+I started with a little bit of exploratory data analysis. The goal is to look at the relationships between the predictors and number of bike rentals. 
 
-Summary statistics of rental count by season
+## Correlations 
 
-```{r Season}
-seasonSum <- dayData %>% group_by(season) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
+Create a correlation plot for the quantitative predictors. 
 
-seasonSum %>% kable()
-```
-
-Total rentals each year 
-
-```{r Year}
-yearSum <- dayData %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
-yearSum %>% kable()
-```
-
-Summary statistics of rental count by dayDatath. It is probably not worth including *dayDatath* and *season* in the model, so I eliminated *season*. 
-
-```{r dayDatath}
-dayDatathSum <- dayData %>% group_by(mnth) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt))
-
-dayDatathSum %>% kable()
-```
-
-Scatter plot of total rentals by hour of the day
-
-```{r Hour}
-avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
-
-ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") 
-```
-
-Average rentals by holiday 
-
-```{r Holiday}
-dayData %>% group_by(holiday) %>% summarize(meanRentals = mean(cnt)) %>% kable()
-```
-
-Average rentals by working day. Working days are neither weekends nor holidays. I decided to eliminate this variable from the model because some of the days under consideration are weekends. 
-
-```{r Workingday}
-dayData %>% group_by(workingday) %>% summarize(meanRentals = mean(cnt)) %>% kable()
-```
-
-Average rentals by weather condition
-
-```{r Weather}
-dayData %>% group_by(weathersit) %>% summarize(meanRentals = mean(cnt)) %>% kable()
-```
-
-Scatter plot of average rentals and temperature
-
-```{r Temp}
-tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", "Average Rentals")
-```
-
-Scatter plot of average rentals and feeling temperature. It does not make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from the model. 
-
-```{r aTemp}
-atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", "Average Rentals")
-```
-
-Scatter plot of average rentals by humidity 
-
-```{r Hum}
-humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") 
-```
-
-Average rentals by windspeed
-
-```{r Wind}
-windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals")
-```
-
-### Correlation between Predictors 
-
-Correlation plot of quantitative predictors. 
-
-It does not make much sense to keep *temp* and *atemp*, so I eliminated *atemp* from the model. 
+*atemp* represents the heat index, which is typically calculated using temperature and humidity. So it makes sense to either eliminate *atemp* from the model or keep *atemp* but eliminate *temp* and *hum*. I decided to eliminate *atemp*. 
 
 ```{r Correlation}
 corr <- dayData %>% select(temp, atemp, windspeed, hum) %>% cor()
@@ -160,57 +107,297 @@ corrplot(corr)
 
 ```
 
+## Summaries and Plots
+
+Explore the relationship between the predictors and number of bikes rented by creating some basic summaries and plots. 
+
+### Helper Function 
+
+Create a helper function to display basic numeric summaries for a given grouping variable. 
+
+```{r} 
+getSum <- function(varName, colName){ 
+  
+  sum <- dayData %>% group_by(dayData[[varName]]) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt), obs = n())
+  
+  output <- sum %>% kable(col.names = c(colName, "Minimum", "1st Quartile", "Median", "Mean", "3rd Quartile", "Maximum", "Number of Observations"))
+  
+  return(output)
+  
+} 
+```
+
+### Season 
+
+Explore how bike rentals on `r paste0(tolower(params$day), "s")` change with the seasons using a basic numeric summary and a boxplot. 
+
+It does not make much sense to keep both *season* and *mnth* in the model, so I decided to eliminate *season*. 
+
+```{r Season}
+getSum(varName = "season", colName = "Season")
+
+ggplot(dayData, aes(x = season, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Season", x = "Season", y = "Number of Rentals") 
+```
+
+### Year 
+
+Looking at total rentals each year gives us some idea of the long term trend in bike rentals on `r paste0(tolower(params$day), "s")`. It would be helpful to have data from more years. 
+
+```{r Year}
+yearSum <- dayData %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
+
+yearSum %>% kable(col.names = c("Year", "Total Rentals"))
+```
+
+### Month
+
+Explore how bike rentals on `r paste0(tolower(params$day), "s")` change depending on the month.  
+
+As already noted, it is probably not worth including *mnth* and *season* in the model, so *season* has been eliminated. 
+
+```{r Month}
+getSum(varName = "mnth", colName = "Month")
+
+ggplot(dayData, aes(x = mnth, y = cnt)) + geom_boxplot() + labs(title = "Retals by Month", x = "Month", y = "Number of Rentals")
+```
+
+### Hour 
+
+Create a scatter plot to look at the relationship between time of day and rentals on `r paste0(tolower(params$day), "s")`.
+
+```{r Hour}
+avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
+
+ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") + geom_smooth()
+```
+
+### Holiday 
+
+Explore change in bike rentals depending on whether the `r tolower(params$day)` in question is a holiday. 
+
+```{r Holiday}
+getSum(varName = "holiday", colName = "Holiday")
+
+ggplot(dayData, aes(x = holiday, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Holiday", x = "Is it a Holiday?", y = "Number of Rentals")
+```
+
+### Working Day 
+
+Average rentals by working day. 
+
+Working days are neither weekends nor holidays. I decided not to keep this variable in the model because it wouldn't make much sense in the reports for Saturday and Sunday. 
+
+```{r Workingday}
+getSum(varName = "workingday", colName = "Working Day")
+
+ggplot(dayData, aes(x = workingday, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Working Day", x = "Is it a Working Day?", y = "Number of Rentals")
+```
+
+### Weather Condition 
+
+Explore how bike rentals on `r paste0(tolower(params$day), "s")` change depending on the weather. 
+
+```{r Weather}
+getSum(varName = "weathersit", colName = "Weather Condition")
+
+ggplot(dayData, aes(x = weathersit, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Weather Condition", x = "What is the Weather Like?", y = "Number of Rentals")
+```
+
+### Temperature
+
+Create a scatter plot to look at the relationship between temperature and number of rentals on `r paste0(tolower(params$day), "s")`.  
+
+
+```{r Temp}
+tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", y = "Average Rentals") + geom_smooth()
+```
+
+### Felt Temperature 
+
+Create a scatter plot to look at the relationship between felt temperature and number of rentals on `r paste0(tolower(params$day), "s")`.  
+
+As already noted, it does not make much sense to keep *atemp* if *temp* and *hum* will be in the model, so I eliminated *atemp* from the model. 
+
+```{r aTemp}
+atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", y = "Average Rentals") + geom_smooth()
+```
+
+### Humidity
+
+Create a scatter plot to look at the relationship between humidity and number of rentals on `r paste0(tolower(params$day), "s")`.   
+
+```{r Hum}
+humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") + geom_smooth()
+```
+
+### Windspeed 
+
+Create a scatter plot to look at the relationship between windspeed and number of rentals on `r paste0(tolower(params$day), "s")`.  
+
+```{r Wind}
+windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
+
+ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals") + geom_smooth()
+```
+
 # Train Models
 
-## Tree
+After exploring the data, I created two models, a non-ensemble tree and a boosted tree. 
 
-```{r Tree}
+## Split Data
+
+Split the data into a training set and a test set. The training set is used to build the models, and the test set is used to evaluate them. 
+
+```{r Split into Train and Test}
 set.seed(123)
-trialTrainIndex <- sample(1:nrow(dayData), size = 100)
-trialTrain <- dayData[trialTrainIndex,]
-trialTrain
+trainIndex <- createDataPartition(dayData$cnt, p = .75, list = FALSE)
 
-trialTestIndex <- sample(1:nrow(dayData), size = 50)
-trialTest <- dayData[trialTestIndex,]
-trialTest
+train <- dayData[trainIndex,]
+test <- dayData[-trainIndex,]
+```
 
+## Non-Ensemble Tree
 
+### Training
 
+Fit a non-ensemble tree model. 
+
+#### Tree Models 
+
+Tree models split each predictor space into regions and make a different prediction for each region. For example, suppose we are interested in predicting life expectancy based on exercise habits. We might split the predictor space into **exercises less than one hour a week** and **exercises at least one hour a week** and then predict that people in the second group live longer. 
+
+How do we decide whether to split at one hour, one and a half hours, two hours, etc? This decision is made using a method called "Recursive Binary Splitting", which we don't have to worry about too much because the *caret* package does it for us. 
+
+Ensemble tree models fit lots of trees and then average their results. Here I have created a basic non-ensemble tree to model bicycle rentals. 
+
+#### Tuning Parameter
+
+This model has one "tuning parameter" called *cp*. *cp* stands for "Complexity Parameter", and it controls the number of "nodes" that the tree has. 
+
+The life expectancy example above has two terminal nodes: **less than one hour** and **at least one hour**. We could complicate the example by adding additional nodes. For instance, we could divide the group **less than one hour** into two subgroups: **less than a half hour** and **greater than half an hour but less than one hour**. And we could divide **at least one hour a week** into **less than two hours** and **greater than two hours**. 
+
+Sometimes increasing the number of nodes makes your model better, but sometimes it makes it worse. There are lots of different methods for picking the best number of nodes. For the bicycle rental model, I used a method called "Leave One Out Cross Validation". 
+
+*LOOCV* works by removing an observation from the data set, using the rest of the data to create a model, and then seeing how well that model does at predicting the observation that was left out. This process is repeated for every observation, and the results are combined. 
+
+If we want to compare two different values of *cp*, we will go through the *LOOCV* process twice and compare the results. In this way, we can test different values of *cp* to see which one performs best. 
+
+I used the *caret* package to test 10 different values of *cp*. 
+
+#### Create the Model 
+
+```{r Train Tree}
 set.seed(123)
 tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
-              data = trialTrain, 
+              data = train, 
               method = "rpart", 
-              trControl = trainControl(method = "LOOCV"))
-tree
+              trControl = trainControl(method = "LOOCV"), 
+              tuneLength = 10)
 ```
+
+### Model Information 
+
+My final non-ensemble tree model uses a *cp* of `r tree$bestTune$cp`. Its root mean square error on the training set is `r min(tree$results$RMSE)`. 
+
+More information about this model is below.  
+
+```{r Train Tree Info}
+tree
+plot(tree$finalModel)
+text(tree$finalModel)
+```
+
 
 ## Boosted Tree 
 
+### Train 
+
+#### Boosted Tree Models 
+
+Boosted trees are another type of tree model. "Boosting" works by fitting a series of trees, each of which is a modified version of the previous tree. The idea is to hone in on the best model. 
+
+#### Tuning Paremeters 
+
+Four tuning parameters are involved:  
+- *n.trees*: number of boosting iterations  
+- *interaction.depth*: maximum tree depth  
+- *shrinkage*: how strongly each subsequent tree is influenced by the previous tree  
+- *n.minobsinnode*: minimum terminal node size  
+
+Values for the tuning parameters are found using Cross Validation. Cross Validation works by splitting the data into groups called "folds". One fold is left out, the rest are used to create a model, and then that model is tested on the fold that was left out. This process is repeated for each fold, and the results are combined. It should be clear that *LOOCV* is just *CV* with the number of folds equal to the number of observations. 
+
+I used the *caret* package to test 81 different combinations of tuning parameters. 
+
+#### Create the Model 
+
 ```{r Boosted Tree}
+tuneGr <- expand.grid(n.trees = seq(from = 50, to = 150, by = 50), 
+                     interaction.depth = 1:3, 
+                     shrinkage = seq(from = .05, to = .15, by = .05), 
+                     n.minobsinnode = 9:11)
+
 set.seed(123)
 boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
-                   data = trialTrain, 
+                   data = train, 
                    method = "gbm", 
-                   trControl = trainControl(method = "LOOCV"), 
+                   trControl = trainControl(method = "cv", number = 10),
+                   tuneGrid = tuneGr, 
                    verbose = FALSE)
+```
+
+### Model Information 
+
+My final boosted tree model uses the following tuning parameters:  
+
+- *n.trees*: `r boostTree$bestTune$n.trees`  
+- *interaction.depth*: `r boostTree$bestTune$interaction.depth`  
+- *shrinkage*: `r boostTree$bestTune$shrinkage`  
+- *n.minobsinnode*: `r boostTree$bestTune$n.minobsinnode`  
+
+Its root mean square error on the training set is `r min(boostTree$results$RMSE)`. 
+
+More information about this model is below.  
+
+```{r Train boostTree Info}
 boostTree
 ```
 
-# Test Models 
+# Test Models  
 
-## Tree
+Test the models on the test set. Select the model that performs better. 
+
+Performance is measured using Root Mean Square Error, which is a measure of how close the model gets to correctly predicting the test data. The RMSE for each model is displayed below. 
 
 ```{r Test Tree}
-treePreds <- predict(tree, trialTrain)
-treeRMSE <- postResample(treePreds, trialTrain$cnt)[1]
+treePreds <- predict(tree, test)
+treeRMSE <- postResample(treePreds, test$cnt)[1]
 
-boostPreds <- predict(boostTree, trialTrain)
-boostRMSE <- postResample(boostPreds, trialTrain$cnt)[1]
+boostPreds <- predict(boostTree, test)
+boostRMSE <- postResample(boostPreds, test$cnt)[1]
 
 modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), RMSE = c(treeRMSE, boostRMSE))
 
-best <- modelPerformance %>% filter(RMSE == min(RMSE))
+modelPerformance %>% kable(col.names = c("Model", "Test RMSE"))
+```
 
+# Best Model
+
+```{r Best Model}
+best <- modelPerformance %>% filter(RMSE == min(RMSE))
+worst <- modelPerformance %>% filter(RMSE == max(RMSE))
+```
+
+The `r tolower(best$model)` performs better than the `r tolower(worst$model)`. 
+
+The `r tolower(best$model)` model is saved to the `final` object below. 
+
+```{r Final}
 if(best$model == "Non-Ensemble Tree"){
   final <- tree
 } else if(best$model == "Boosted Tree"){
@@ -219,16 +406,8 @@ if(best$model == "Non-Ensemble Tree"){
   stop("Error")
 }
 
-final
+final$finalModel
 ```
-
-# Best Model
-
-```{r}
-
-```
-
-
 
 
 

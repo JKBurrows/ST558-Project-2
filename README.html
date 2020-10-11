@@ -636,7 +636,7 @@ body {
 <span id="cb1-11"><a href="#cb1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12"></a>reports &lt;-<span class="st"> </span><span class="kw">tibble</span>(output_file, params)</span>
 <span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="kw">apply</span>(reports, <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> <span class="cf">function</span>(x){<span class="kw">render</span>(<span class="dt">input =</span> <span class="st">&quot;./BurrowsProject2.Rmd&quot;</span>, <span class="dt">output_file =</span> x[[<span class="dv">1</span>]], <span class="dt">params =</span> x[[<span class="dv">2</span>]])})</span></code></pre></div>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="kw">apply</span>(reports, <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> <span class="cf">function</span>(x){<span class="kw">render</span>(<span class="dt">input =</span> <span class="st">&quot;./BurrowsProject2Analysis.Rmd&quot;</span>, <span class="dt">output_file =</span> x[[<span class="dv">1</span>]], <span class="dt">params =</span> x[[<span class="dv">2</span>]])})</span></code></pre></div>
 
 </body>
 </html>
