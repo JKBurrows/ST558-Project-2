@@ -2,38 +2,48 @@ Joshua Burrows Project 2
 ================
 16 October 2020
 
-  - [Monday: Introduction](#monday-introduction)
+  - [Bike Rentals on Mondays:
+    Introduction](#bike-rentals-on-mondays-introduction)
   - [Read in Data](#read-in-data)
       - [Get Bikes Data](#get-bikes-data)
       - [Factors](#factors)
       - [Split by Day](#split-by-day)
   - [Exploratory Data Analysis](#exploratory-data-analysis)
-      - [Correlations](#correlations)
-      - [Summaries and Plots](#summaries-and-plots)
-          - [Helper Function](#helper-function)
-          - [Season](#season)
-          - [Year](#year)
-          - [Month](#month)
+      - [Quantitative Summaries and
+        Plots](#quantitative-summaries-and-plots)
+          - [Correlations](#correlations)
           - [Hour](#hour)
-          - [Holiday](#holiday)
-          - [Working Day](#working-day)
-          - [Weather Condition](#weather-condition)
           - [Temperature](#temperature)
           - [Felt Temperature](#felt-temperature)
           - [Humidity](#humidity)
           - [Windspeed](#windspeed)
+      - [Categorical Summaries and
+        Plots](#categorical-summaries-and-plots)
+          - [Helper Function](#helper-function)
+          - [Season](#season)
+          - [Year](#year)
+          - [Month](#month)
+          - [Holiday](#holiday)
+          - [Working Day](#working-day)
+          - [Weather Condition](#weather-condition)
   - [Train Models](#train-models)
       - [Split Data](#split-data)
       - [Non-Ensemble Tree](#non-ensemble-tree)
           - [Training](#training)
+              - [Tree Models](#tree-models)
+              - [Tuning Parameter](#tuning-parameter)
+              - [Create the Model](#create-the-model)
           - [Model Information](#model-information)
       - [Boosted Tree](#boosted-tree)
           - [Train](#train)
+              - [Boosted Tree Models](#boosted-tree-models)
+              - [Tuning Paremeters](#tuning-paremeters)
+              - [Create the Model](#create-the-model-1)
           - [Model Information](#model-information-1)
   - [Test Models](#test-models)
   - [Best Model](#best-model)
 
-# Monday: Introduction
+# Bike Rentals on Mondays: Introduction
 
 This document walks though the process of creating a model to predict
 the number of bikes that will be rented on mondays.
@@ -71,7 +81,9 @@ Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
 ``` r
 bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
 
-bikes %>% head() %>% kable()
+bikes %>%
+  head() %>%
+  kable()
 ```
 
 | instant | dteday     | season | yr | mnth | hr | holiday | weekday | workingday | weathersit | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -89,7 +101,7 @@ Convert categorical variables to factors.
 
 ``` r
 bikes$weekday <- as.factor(bikes$weekday)
-levels(bikes$weekday) <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday") 
+levels(bikes$weekday) <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
 
 bikes$season <- as.factor(bikes$season)
 levels(bikes$season) <- c("winter", "spring", "summer", "fall")
@@ -109,7 +121,9 @@ levels(bikes$holiday) <- c("no", "yes")
 bikes$workingday <- as.factor(bikes$workingday)
 levels(bikes$workingday) <- c("no", "yes")
 
-bikes %>% head() %>% kable()
+bikes %>%
+  head() %>%
+  kable()
 ```
 
 | instant | dteday     | season | yr   | mnth | hr | holiday | weekday  | workingday | weathersit    | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -128,7 +142,9 @@ Grab the data for monday.
 ``` r
 dayData <- bikes %>% filter(weekday == params$day)
 
-dayData %>% head() %>% kable()
+dayData %>%
+  head() %>%
+  kable()
 ```
 
 | instant | dteday     | season | yr   | mnth | hr | holiday | weekday | workingday | weathersit | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -146,7 +162,9 @@ I started with a little bit of exploratory data analysis. The goal is to
 look at the relationships between the predictors and number of bike
 rentals.
 
-## Correlations
+## Quantitative Summaries and Plots
+
+### Correlations
 
 Create a correlation plot for the quantitative predictors.
 
@@ -156,17 +174,139 @@ from the model or keep *atemp* but eliminate *temp* and *hum*. I decided
 to eliminate *atemp*.
 
 ``` r
-corr <- dayData %>% select(temp, atemp, windspeed, hum) %>% cor()
+corr <- dayData %>%
+  select(temp, atemp, windspeed, hum) %>%
+  cor()
 
 corrplot(corr)
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Correlation-1.png)<!-- -->
 
-## Summaries and Plots
+### Hour
+
+Create a scatter plot to investigate the relationship between time of
+day and rentals on mondays. Fit a line through the points to get a basic
+idea of their relationship.
+
+``` r
+avgRentals <- dayData %>%
+  group_by(hr) %>%
+  summarize(meanRentals = mean(cnt))
+
+ggplot(avgRentals, aes(x = hr, y = meanRentals)) +
+  geom_point() +
+  labs(title = paste0("Total Rentals on ", paste0(params$day, "s"), " by Hour"), x = "Hour of the Day", y = "Total Rentals") +
+  geom_smooth()
+```
+
+![](BurrowsProject2Analysis_files/figure-gfm/Hour-1.png)<!-- -->
+
+### Temperature
+
+Create a scatter plot to investigate the relationship between
+temperature and number of rentals on mondays. Fit a line through the
+points to get a basic idea of their relationship.
+
+The size of the dots represents the number of observations at each
+temperature.
+
+``` r
+tempAvg <- dayData %>%
+  group_by(temp) %>%
+  summarize(avgRentals = mean(cnt), n = n())
+
+ggplot(tempAvg, aes(x = temp, y = avgRentals)) +
+  geom_point(aes(size = n)) +
+  geom_smooth() +
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Temperature"), x = "Normalized Temperature", y = "Average Rentals") +
+  scale_size_continuous(name = "Number of Obs")
+```
+
+![](BurrowsProject2Analysis_files/figure-gfm/Temp-1.png)<!-- -->
+
+### Felt Temperature
+
+Create a scatter plot to investigate the relationship between felt
+temperature and number of rentals on mondays. Fit a line through the
+points to get a basic idea of their relationship.
+
+The size of the dots represents the number of observations at each felt
+temperatrure.
+
+As already noted, it does not make much sense to keep *atemp* if *temp*
+and *hum* will be in the model, so I eliminated *atemp* from the model.
+
+``` r
+atempAvg <- dayData %>%
+  group_by(atemp) %>%
+  summarize(avgRentals = mean(cnt), n = n())
+
+ggplot(atempAvg, aes(x = atemp, y = avgRentals)) +
+  geom_point(aes(size = n)) +
+  geom_smooth() +
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Felt Temperature"), x = "Normalized Feeling Temperature", y = "Average Rentals") +
+  scale_size_continuous(name = "Number of Obs")
+```
+
+![](BurrowsProject2Analysis_files/figure-gfm/aTemp-1.png)<!-- -->
+
+### Humidity
+
+Create a scatter plot to investigate the relationship between humidity
+and number of rentals on mondays. Fit a line through the points to get a
+basic idea of their relationship.
+
+The size of the dots represents the number of observations at each
+humidity level.
+
+Note: There are no holidays on Saturday or Sunday because the holiday
+data has been extracted from the [Washington D.C. HR Department’s
+Holiday Schedule](https://dchr.dc.gov/page/holiday-schedules), which
+only lists holidays that fall during the work week.
+
+``` r
+humAvg <- dayData %>%
+  group_by(hum) %>%
+  summarize(avgRentals = mean(cnt), n = n())
+
+ggplot(humAvg, aes(x = hum, y = avgRentals)) +
+  geom_point(aes(size = n)) +
+  geom_smooth() +
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Humidity"), x = "Normalized Humidity", y = "Average Rentals") +
+  scale_size_continuous(name = "Number of Obs")
+```
+
+![](BurrowsProject2Analysis_files/figure-gfm/Hum-1.png)<!-- -->
+
+### Windspeed
+
+Create a scatter plot to investigate the relationship between windspeed
+and number of rentals on mondays. Fit a line through the points to get a
+basic idea of their relationship.
+
+The size of the dots represents the number of observations at each
+windspeed.
+
+``` r
+windAvg <- dayData %>%
+  group_by(windspeed) %>%
+  summarize(avgRentals = mean(cnt), n = n())
+
+ggplot(windAvg, aes(x = windspeed, y = avgRentals)) +
+  geom_point(aes(size = n)) +
+  geom_smooth() +
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Windspeed"), x = "Normalized Windspeed", y = "Average Rentals") +
+  scale_size_continuous(name = "Number of Obs")
+```
+
+![](BurrowsProject2Analysis_files/figure-gfm/Wind-1.png)<!-- -->
+
+## Categorical Summaries and Plots
 
 Explore the relationship between the predictors and number of bikes
-rented by creating some basic summaries and plots.
+rented on `paste0(tolower(params$day), "s")` by creating some basic
+summaries and plots.
 
 ### Helper Function
 
@@ -174,21 +314,22 @@ Create a helper function to display basic numeric summaries for a given
 grouping variable.
 
 ``` r
-getSum <- function(varName, colName){ 
-  
-  sum <- dayData %>% group_by(dayData[[varName]]) %>% summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt), obs = n())
-  
+getSum <- function(varName, colName) {
+  sum <- dayData %>%
+    group_by(dayData[[varName]]) %>%
+    summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt), obs = n())
+
   output <- sum %>% kable(col.names = c(colName, "Minimum", "1st Quartile", "Median", "Mean", "3rd Quartile", "Maximum", "Number of Observations"))
-  
+
   return(output)
-  
-} 
+}
 ```
 
 ### Season
 
 Explore how bike rentals on mondays change with the seasons using a
-basic numeric summary and a boxplot.
+basic numeric summary and a boxplot. The boxplot can be used to identify
+outliers.
 
 It does not make much sense to keep both *season* and *mnth* in the
 model, so I decided to eliminate *season*.
@@ -205,7 +346,9 @@ getSum(varName = "season", colName = "Season")
 | fall   |       2 |        47.75 |  166.0 | 203.6167 |       302.00 |     922 |                    600 |
 
 ``` r
-ggplot(dayData, aes(x = season, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Season", x = "Season", y = "Number of Rentals") 
+ggplot(dayData, aes(x = season, y = cnt)) +
+  geom_boxplot() +
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Season"), x = "Season", y = "Number of Rentals")
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Season-1.png)<!-- -->
@@ -217,7 +360,9 @@ trend in bike rentals on mondays. It would be helpful to have data from
 more years.
 
 ``` r
-yearSum <- dayData %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
+yearSum <- dayData %>%
+  group_by(yr) %>%
+  summarize(totalRentals = sum(cnt))
 
 yearSum %>% kable(col.names = c("Year", "Total Rentals"))
 ```
@@ -254,23 +399,12 @@ getSum(varName = "mnth", colName = "Month")
 | dec   |       1 |        23.25 |  113.0 | 147.09813 |       213.25 |     731 |                    214 |
 
 ``` r
-ggplot(dayData, aes(x = mnth, y = cnt)) + geom_boxplot() + labs(title = "Retals by Month", x = "Month", y = "Number of Rentals")
+ggplot(dayData, aes(x = mnth, y = cnt)) +
+  geom_boxplot() +
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Month"), x = "Month", y = "Number of Rentals")
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Month-1.png)<!-- -->
-
-### Hour
-
-Create a scatter plot to look at the relationship between time of day
-and rentals on mondays.
-
-``` r
-avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
-
-ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = "Total Rentals by Hour", x = "Hour of the Day", y = "Total Rentals") + geom_smooth()
-```
-
-![](BurrowsProject2Analysis_files/figure-gfm/Hour-1.png)<!-- -->
 
 ### Holiday
 
@@ -287,7 +421,9 @@ getSum(varName = "holiday", colName = "Holiday")
 | yes     |       1 |           31 |  100.0 | 166.9608 |       281.00 |     712 |                    357 |
 
 ``` r
-ggplot(dayData, aes(x = holiday, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Holiday", x = "Is it a Holiday?", y = "Number of Rentals")
+ggplot(dayData, aes(x = holiday, y = cnt)) +
+  geom_boxplot() +
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Holiday"), x = "Is it a Holiday?", y = "Number of Rentals")
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Holiday-1.png)<!-- -->
@@ -310,7 +446,9 @@ getSum(varName = "workingday", colName = "Working Day")
 | yes         |       1 |           37 |  142.5 | 186.5683 |       266.75 |     968 |                   2122 |
 
 ``` r
-ggplot(dayData, aes(x = workingday, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Working Day", x = "Is it a Working Day?", y = "Number of Rentals")
+ggplot(dayData, aes(x = workingday, y = cnt)) +
+  geom_boxplot() +
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Working Day"), x = "Is it a Working Day?", y = "Number of Rentals")
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Workingday-1.png)<!-- -->
@@ -331,65 +469,12 @@ getSum(varName = "weathersit", colName = "Weather Condition")
 | downright unpleasant |     164 |          164 |    164 | 164.0000 |       164.00 |     164 |                      1 |
 
 ``` r
-ggplot(dayData, aes(x = weathersit, y = cnt)) + geom_boxplot() + labs(title = "Rentals by Weather Condition", x = "What is the Weather Like?", y = "Number of Rentals")
+ggplot(dayData, aes(x = weathersit, y = cnt)) +
+  geom_boxplot() +
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Weather Condition"), x = "What is the Weather Like?", y = "Number of Rentals")
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Weather-1.png)<!-- -->
-
-### Temperature
-
-Create a scatter plot to look at the relationship between temperature
-and number of rentals on mondays.
-
-``` r
-tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Temperature", y = "Average Rentals") + geom_smooth()
-```
-
-![](BurrowsProject2Analysis_files/figure-gfm/Temp-1.png)<!-- -->
-
-### Felt Temperature
-
-Create a scatter plot to look at the relationship between felt
-temperature and number of rentals on mondays.
-
-As already noted, it does not make much sense to keep *atemp* if *temp*
-and *hum* will be in the model, so I eliminated *atemp* from the model.
-
-``` r
-atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Temperature", x = "Normalized Feeling Temperature", y = "Average Rentals") + geom_smooth()
-```
-
-![](BurrowsProject2Analysis_files/figure-gfm/aTemp-1.png)<!-- -->
-
-### Humidity
-
-Create a scatter plot to look at the relationship between humidity and
-number of rentals on mondays.
-
-``` r
-humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Humidity", x = "Normalized Humidity", y = "Average Rentals") + geom_smooth()
-```
-
-![](BurrowsProject2Analysis_files/figure-gfm/Hum-1.png)<!-- -->
-
-### Windspeed
-
-Create a scatter plot to look at the relationship between windspeed and
-number of rentals on mondays.
-
-``` r
-windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt))
-
-ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point() + labs(title = "Average Rentals by Windspeed", x = "Normalized Windspeed", y = "Average Rentals") + geom_smooth()
-```
-
-![](BurrowsProject2Analysis_files/figure-gfm/Wind-1.png)<!-- -->
 
 # Train Models
 
@@ -405,8 +490,8 @@ used to build the models, and the test set is used to evaluate them.
 set.seed(123)
 trainIndex <- createDataPartition(dayData$cnt, p = .75, list = FALSE)
 
-train <- dayData[trainIndex,]
-test <- dayData[-trainIndex,]
+train <- dayData[trainIndex, ]
+test <- dayData[-trainIndex, ]
 ```
 
 ## Non-Ensemble Tree
@@ -466,11 +551,12 @@ I used the *caret* package to test 10 different values of *cp*.
 
 ``` r
 set.seed(123)
-tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
-              data = train, 
-              method = "rpart", 
-              trControl = trainControl(method = "LOOCV"), 
-              tuneLength = 10)
+tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed,
+  data = train,
+  method = "rpart",
+  trControl = trainControl(method = "LOOCV"),
+  tuneLength = 10
+)
 ```
 
 ### Model Information
@@ -549,18 +635,21 @@ parameters.
 #### Create the Model
 
 ``` r
-tuneGr <- expand.grid(n.trees = seq(from = 50, to = 150, by = 50), 
-                     interaction.depth = 1:3, 
-                     shrinkage = seq(from = .05, to = .15, by = .05), 
-                     n.minobsinnode = 9:11)
+tuneGr <- expand.grid(
+  n.trees = seq(from = 50, to = 150, by = 50),
+  interaction.depth = 1:3,
+  shrinkage = seq(from = .05, to = .15, by = .05),
+  n.minobsinnode = 9:11
+)
 
 set.seed(123)
-boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
-                   data = train, 
-                   method = "gbm", 
-                   trControl = trainControl(method = "cv", number = 10),
-                   tuneGrid = tuneGr, 
-                   verbose = FALSE)
+boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed,
+  data = train,
+  method = "gbm",
+  trControl = trainControl(method = "cv", number = 10),
+  tuneGrid = tuneGr,
+  verbose = FALSE
+)
 ```
 
 ### Model Information
@@ -774,33 +863,34 @@ treeRMSE <- postResample(treePreds, test$cnt)[1]
 boostPreds <- predict(boostTree, test)
 boostRMSE <- postResample(boostPreds, test$cnt)[1]
 
-modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), RMSE = c(treeRMSE, boostRMSE))
+modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), trainRMSE = c(min(tree$results$RMSE), min(boostTree$results$RMSE)), testRMSE = c(treeRMSE, boostRMSE))
 
-modelPerformance %>% kable(col.names = c("Model", "Test RMSE"))
+modelPerformance %>% kable(col.names = c("Model", "Train RMSE", "Test RMSE"))
 ```
 
-| Model             | Test RMSE |
-| :---------------- | --------: |
-| Non-Ensemble Tree |  96.88941 |
-| Boosted Tree      |  58.29972 |
+| Model             | Train RMSE | Test RMSE |
+| :---------------- | ---------: | --------: |
+| Non-Ensemble Tree |   91.68059 |  96.88941 |
+| Boosted Tree      |   57.04409 |  58.29972 |
 
 # Best Model
 
 ``` r
-best <- modelPerformance %>% filter(RMSE == min(RMSE))
-worst <- modelPerformance %>% filter(RMSE == max(RMSE))
+best <- modelPerformance %>% filter(testRMSE == min(testRMSE))
+worst <- modelPerformance %>% filter(testRMSE == max(testRMSE))
 ```
 
-The boosted tree performs better than the non-ensemble tree.
+The boosted tree performs better than the non-ensemble tree as judged by
+RMSE on the test set.
 
 The boosted tree model is saved to the `final` object below.
 
 ``` r
-if(best$model == "Non-Ensemble Tree"){
+if (best$model == "Non-Ensemble Tree") {
   final <- tree
-} else if(best$model == "Boosted Tree"){
+} else if (best$model == "Boosted Tree") {
   final <- boostTree
-} else{
+} else {
   stop("Error")
 }
 

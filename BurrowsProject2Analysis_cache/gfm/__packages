@@ -1,0 +1,17 @@
+base
+knitr
+rmarkdown
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+forcats
+lattice
+caret
+corrplot
+shiny
+styler
