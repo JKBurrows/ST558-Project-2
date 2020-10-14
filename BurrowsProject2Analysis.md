@@ -35,7 +35,7 @@ Joshua Burrows Project 2
               - [Create the Model](#create-the-model)
           - [Model Information](#model-information)
       - [Boosted Tree](#boosted-tree)
-          - [Train](#train)
+          - [Training](#training-1)
               - [Boosted Tree Models](#boosted-tree-models)
               - [Tuning Paremeters](#tuning-paremeters)
               - [Create the Model](#create-the-model-1)
@@ -194,6 +194,8 @@ avgRentals <- dayData %>%
   group_by(hr) %>%
   summarize(meanRentals = mean(cnt))
 
+corrHour <- cor(avgRentals$hr, avgRentals$meanRentals)
+
 ggplot(avgRentals, aes(x = hr, y = meanRentals)) +
   geom_point() +
   labs(title = paste0("Total Rentals on ", paste0(params$day, "s"), " by Hour"), x = "Hour of the Day", y = "Total Rentals") +
@@ -201,6 +203,12 @@ ggplot(avgRentals, aes(x = hr, y = meanRentals)) +
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Hour-1.png)<!-- -->
+
+The correlation between hour and average rentals is 0.5174182.
+
+Be careful, correlation measures straight line relationships, so if the
+plot above shows a curved relationship, correlation may not be a useful
+measure.
 
 ### Temperature
 
@@ -216,6 +224,8 @@ tempAvg <- dayData %>%
   group_by(temp) %>%
   summarize(avgRentals = mean(cnt), n = n())
 
+corrTemp <- cor(tempAvg$temp, tempAvg$avgRentals)
+
 ggplot(tempAvg, aes(x = temp, y = avgRentals)) +
   geom_point(aes(size = n)) +
   geom_smooth() +
@@ -224,6 +234,12 @@ ggplot(tempAvg, aes(x = temp, y = avgRentals)) +
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Temp-1.png)<!-- -->
+
+The correlation between temperature and average rentals is 0.8297901.
+
+Be careful, correlation measures straight line relationships, so if the
+plot above shows a curved relationship, correlation may not be a useful
+measure.
 
 ### Felt Temperature
 
@@ -242,6 +258,8 @@ atempAvg <- dayData %>%
   group_by(atemp) %>%
   summarize(avgRentals = mean(cnt), n = n())
 
+corrATemp <- cor(atempAvg$atemp, atempAvg$avgRentals)
+
 ggplot(atempAvg, aes(x = atemp, y = avgRentals)) +
   geom_point(aes(size = n)) +
   geom_smooth() +
@@ -250,6 +268,13 @@ ggplot(atempAvg, aes(x = atemp, y = avgRentals)) +
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/aTemp-1.png)<!-- -->
+
+The correlation between felt temperature and average rentals is
+0.8723605.
+
+Be careful, correlation measures straight line relationships, so if the
+plot above shows a curved relationship, correlation may not be a useful
+measure.
 
 ### Humidity
 
@@ -270,6 +295,8 @@ humAvg <- dayData %>%
   group_by(hum) %>%
   summarize(avgRentals = mean(cnt), n = n())
 
+corrHum <- cor(humAvg$hum, humAvg$avgRentals)
+
 ggplot(humAvg, aes(x = hum, y = avgRentals)) +
   geom_point(aes(size = n)) +
   geom_smooth() +
@@ -278,6 +305,12 @@ ggplot(humAvg, aes(x = hum, y = avgRentals)) +
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Hum-1.png)<!-- -->
+
+The correlation between humidity and average rentals is -0.5675301.
+
+Be careful, correlation measures straight line relationships, so if the
+plot above shows a curved relationship, correlation may not be a useful
+measure.
 
 ### Windspeed
 
@@ -293,6 +326,8 @@ windAvg <- dayData %>%
   group_by(windspeed) %>%
   summarize(avgRentals = mean(cnt), n = n())
 
+corrWind <- cor(windAvg$windspeed, windAvg$avgRentals)
+
 ggplot(windAvg, aes(x = windspeed, y = avgRentals)) +
   geom_point(aes(size = n)) +
   geom_smooth() +
@@ -301,6 +336,12 @@ ggplot(windAvg, aes(x = windspeed, y = avgRentals)) +
 ```
 
 ![](BurrowsProject2Analysis_files/figure-gfm/Wind-1.png)<!-- -->
+
+The correlation between windspeed and average rentals is 0.552632.
+
+Be careful, correlation measures straight line relationships, so if the
+plot above shows a curved relationship, correlation may not be a useful
+measure.
 
 ## Categorical Summaries and Plots
 
@@ -604,7 +645,7 @@ text(tree$finalModel)
 
 ## Boosted Tree
 
-### Train
+### Training
 
 #### Boosted Tree Models
 

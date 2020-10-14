@@ -82,7 +82,7 @@ levels(bikes$workingday) <- c("no", "yes")
 bikes %>% head() %>% kable()
 ```
 
-## Split by Day 
+## Filter by Day 
 
 Grab the data for `r tolower(params$day)`. 
 
@@ -96,13 +96,13 @@ dayData %>% head() %>% kable()
 
 I started with a little bit of exploratory data analysis. The goal is to look at the relationships between the predictors and number of bike rentals. 
 
-## Quantitative Summaries and Plots 
+## Quantitative Predictors 
 
 ### Correlations 
 
-Create a correlation plot for the quantitative predictors. 
+Visualize the strength of the relationships between the quantitative predictors. 
 
-*atemp* represents the heat index, which is typically calculated using temperature and humidity. So it makes sense to either eliminate *atemp* from the model or keep *atemp* but eliminate *temp* and *hum*. I decided to eliminate *atemp*. 
+Unsurprisingly, *atemp* and *temp* are strongly correlated. *atemp* represents the heat index, which is typically calculated using temperature and humidity. So it makes sense to either eliminate *atemp* from the model or keep *atemp* but eliminate *temp* and *hum*. I decided to eliminate *atemp*. 
 
 ```{r Correlation}
 corr <- dayData %>% select(temp, atemp, windspeed, hum) %>% cor()
@@ -117,8 +117,14 @@ Create a scatter plot to investigate the relationship between time of day and re
 ```{r Hour}
 avgRentals <- dayData %>% group_by(hr) %>% summarize(meanRentals = mean(cnt))
 
+corrHour <- cor(avgRentals$hr, avgRentals$meanRentals)
+
 ggplot(avgRentals, aes(x = hr, y = meanRentals)) + geom_point() + labs(title = paste0("Total Rentals on ", paste0(params$day, "s"), " by Hour"), x = "Hour of the Day", y = "Total Rentals") + geom_smooth()
 ```
+
+The correlation between hour and average rentals is `r corrHour`. 
+
+Be careful, correlation measures straight line relationships, so if the plot above shows a curved relationship, correlation may not be a useful measure.  
 
 ### Temperature
 
@@ -129,8 +135,14 @@ The size of the dots represents the number of observations at each temperature.
 ```{r Temp}
 tempAvg <- dayData %>% group_by(temp) %>% summarize(avgRentals = mean(cnt), n = n())
 
+corrTemp <- cor(tempAvg$temp, tempAvg$avgRentals)
+
 ggplot(tempAvg, aes(x = temp, y = avgRentals)) + geom_point(aes(size = n)) + geom_smooth() + labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Temperature"), x = "Normalized Temperature", y = "Average Rentals") + scale_size_continuous(name = "Number of Obs")
 ```
+
+The correlation between temperature and average rentals is `r corrTemp`. 
+
+Be careful, correlation measures straight line relationships, so if the plot above shows a curved relationship, correlation may not be a useful measure.  
 
 ### Felt Temperature 
 
@@ -143,8 +155,14 @@ As already noted, it does not make much sense to keep *atemp* if *temp* and *hum
 ```{r aTemp}
 atempAvg <- dayData %>% group_by(atemp) %>% summarize(avgRentals = mean(cnt), n = n())
 
+corrATemp <- cor(atempAvg$atemp, atempAvg$avgRentals)
+
 ggplot(atempAvg, aes(x = atemp, y = avgRentals)) + geom_point(aes(size = n)) + geom_smooth() + labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Felt Temperature"), x = "Normalized Feeling Temperature", y = "Average Rentals") + scale_size_continuous(name = "Number of Obs")
 ```
+
+The correlation between felt temperature and average rentals is `r corrATemp`. 
+
+Be careful, correlation measures straight line relationships, so if the plot above shows a curved relationship, correlation may not be a useful measure.  
 
 ### Humidity
 
@@ -152,13 +170,17 @@ Create a scatter plot to investigate the relationship between humidity and numbe
 
 The size of the dots represents the number of observations at each humidity level. 
 
-Note: There are no holidays on Saturday or Sunday because the holiday data has been extracted from the [Washington D.C. HR Department's Holiday Schedule](https://dchr.dc.gov/page/holiday-schedules), which only lists holidays that fall during the work week. 
-
 ```{r Hum}
 humAvg <- dayData %>% group_by(hum) %>% summarize(avgRentals = mean(cnt), n = n())
 
+corrHum <- cor(humAvg$hum, humAvg$avgRentals)
+
 ggplot(humAvg, aes(x = hum, y = avgRentals)) + geom_point(aes(size = n)) + geom_smooth() + labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Humidity"), x = "Normalized Humidity", y = "Average Rentals") + scale_size_continuous(name = "Number of Obs")
 ```
+
+The correlation between humidity and average rentals is `r corrHum`. 
+
+Be careful, correlation measures straight line relationships, so if the plot above shows a curved relationship, correlation may not be a useful measure.  
 
 ### Windspeed 
 
@@ -169,12 +191,16 @@ The size of the dots represents the number of observations at each windspeed.
 ```{r Wind}
 windAvg <- dayData %>% group_by(windspeed) %>% summarize(avgRentals = mean(cnt), n = n())
 
+corrWind <- cor(windAvg$windspeed, windAvg$avgRentals)
+
 ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + geom_point(aes(size = n)) + geom_smooth() + labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Windspeed"), x = "Normalized Windspeed", y = "Average Rentals") + scale_size_continuous(name = "Number of Obs")
 ```
 
-## Categorical Summaries and Plots
+The correlation between windspeed and average rentals is `r corrWind`. 
 
-Explore the relationship between the predictors and number of bikes rented on `paste0(tolower(params$day), "s")` by creating some basic summaries and plots. 
+Be careful, correlation measures straight line relationships, so if the plot above shows a curved relationship, correlation may not be a useful measure.  
+
+## Categorical Predictors 
 
 ### Helper Function 
 
@@ -206,7 +232,7 @@ ggplot(dayData, aes(x = season, y = cnt)) + geom_boxplot() + labs(title = paste0
 
 ### Year 
 
-Looking at total rentals each year gives us some idea of the long term trend in bike rentals on `r paste0(tolower(params$day), "s")`. It would be helpful to have data from more years. 
+Looking at total rentals each year gives us some idea of the long term trend in bike rentals on `r paste0(tolower(params$day), "s")`. It would be helpful to have data from more years, though. 
 
 ```{r Year}
 yearSum <- dayData %>% group_by(yr) %>% summarize(totalRentals = sum(cnt))
@@ -229,7 +255,9 @@ ggplot(dayData, aes(x = mnth, y = cnt)) + geom_boxplot() + labs(title = paste0("
 
 ### Holiday 
 
-Explore change in bike rentals depending on whether the `r tolower(params$day)` in question is a holiday. 
+Explore how bike rentals change depending on whether the `r tolower(params$day)` in question is a holiday. 
+
+Note: There are no holidays on Saturday or Sunday because the holiday data has been extracted from the [Washington D.C. HR Department's Holiday Schedule](https://dchr.dc.gov/page/holiday-schedules), which only lists holidays that fall during the work week. 
 
 ```{r Holiday}
 getSum(varName = "holiday", colName = "Holiday")
@@ -239,7 +267,7 @@ ggplot(dayData, aes(x = holiday, y = cnt)) + geom_boxplot() + labs(title = paste
 
 ### Working Day 
 
-Average rentals by working day. 
+Explore how bike rentals change depending on whether the day in question is a working day. 
 
 Working days are neither weekends nor holidays. I decided not to keep this variable in the model because it wouldn't make much sense in the reports for Saturday and Sunday. 
 
@@ -293,7 +321,7 @@ Ensemble tree models fit lots of trees and then average their results. Here I ha
 
 This model has one "tuning parameter" called *cp*. *cp* stands for "Complexity Parameter", and it controls the number of "nodes" that the tree has. 
 
-The life expectancy example above has two terminal nodes: **less than one hour** and **at least one hour**. We could complicate the example by adding additional nodes. For instance, we could divide the group **less than one hour** into two subgroups: **less than a half hour** and **greater than half an hour but less than one hour**. And we could divide **at least one hour a week** into **less than two hours** and **greater than two hours**. 
+The life expectancy example above has two terminal nodes: **less than one hour** and **at least one hour**. We could complicate the example by adding additional nodes. For instance, we could divide the group **less than one hour** into two subgroups: **less than half an hour** and **greater than half an hour but less than one hour**. And we could divide **at least one hour a week** into **less than two hours but at least one hour** and **greater than two hours**. 
 
 Sometimes increasing the number of nodes makes your model better, but sometimes it makes it worse. There are lots of different methods for picking the best number of nodes. For the bicycle rental model, I used a method called "Leave One Out Cross Validation". 
 
@@ -383,9 +411,9 @@ boostTree
 
 # Test Models  
 
-Test the models on the test set. Select the model that performs better. 
+I tested the models on the test set and selected the model that performed best. 
 
-Performance is measured using Root Mean Square Error, which is a measure of how close the model gets to correctly predicting the test data. The RMSE for each model is displayed below. 
+Performance was measured using Root Mean Square Error, which is a measure of how close the model gets to correctly predicting the test data. The RMSE for each model is displayed below. 
 
 ```{r Test Tree}
 treePreds <- predict(tree, test)

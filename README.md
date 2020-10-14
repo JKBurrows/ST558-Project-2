@@ -8,7 +8,8 @@ For this project, I analyzed data about the Capital bike sharing system.
 This data has been made available by [the UCI Machine Learning
 Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
 
-My analysis makes use of the following packages:
+My analysis makes use of the following packages: *knitr*, *rmarkdown*,
+*tidyverse*, *caret*, *corrplot*, *shiny*, and *styler*.
 
 # Models
 
