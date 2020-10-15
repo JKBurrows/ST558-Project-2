@@ -9,7 +9,7 @@ This data has been made available by [the UCI Machine Learning
 Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
 
 My analysis makes use of the following packages: *knitr*, *rmarkdown*,
-*tidyverse*, *caret*, *corrplot*, *shiny*, and *styler*.
+*tidyverse*, *caret*, *corrplot*, and *shiny*.
 
 # Models
 

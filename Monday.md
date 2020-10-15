@@ -44,11 +44,15 @@ Joshua Burrows Project 2
 # Bike Rentals on Mondays: Introduction
 
 This document walks though the process of creating a model to predict
-the number of bikes that will be rented on mondays.
+hourly bike rentals on mondays. I compared two models - a *non-ensemble
+tree* and a *boosted tree* - and picked the one that does better.
 
-I compared two models - a *non-ensemble tree* and a *boosted tree* - and
-picked the one that does better. These models use the following
-predictor variables:
+The data comes from the Capital bike sharing system, and it is available
+[here](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
+This data includes an hourly count of bike rentals for 2011 and 2012 as
+well as information about the weather and the time of year.
+
+My models use the following predictor variables:
 
   - yr: year (2011 or 2012)  
   - mnth: month  
@@ -73,15 +77,12 @@ You can return to the homepage for this project by clicking
 
 ## Get Bikes Data
 
-Read in data that has been downloaded from [the UCI Machine Learning
-Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
+Read in data.
 
 ``` r
 bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
 
-bikes %>%
-  head() %>%
-  kable()
+bikes %>% head() %>% kable()
 ```
 
 | instant | dteday     | season | yr | mnth | hr | holiday | weekday | workingday | weathersit | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -99,7 +100,7 @@ Convert categorical variables to factors.
 
 ``` r
 bikes$weekday <- as.factor(bikes$weekday)
-levels(bikes$weekday) <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+levels(bikes$weekday) <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday") 
 
 bikes$season <- as.factor(bikes$season)
 levels(bikes$season) <- c("winter", "spring", "summer", "fall")
@@ -119,9 +120,7 @@ levels(bikes$holiday) <- c("no", "yes")
 bikes$workingday <- as.factor(bikes$workingday)
 levels(bikes$workingday) <- c("no", "yes")
 
-bikes %>%
-  head() %>%
-  kable()
+bikes %>% head() %>% kable()
 ```
 
 | instant | dteday     | season | yr   | mnth | hr | holiday | weekday  | workingday | weathersit    | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -140,9 +139,7 @@ Grab the data for monday.
 ``` r
 dayData <- bikes %>% filter(weekday == params$day)
 
-dayData %>%
-  head() %>%
-  kable()
+dayData %>% head() %>% kable()
 ```
 
 | instant | dteday     | season | yr   | mnth | hr | holiday | weekday | workingday | weathersit | temp |  atemp |  hum | windspeed | casual | registered | cnt |
@@ -174,8 +171,8 @@ from the model or keep *atemp* but eliminate *temp* and *hum*. I decided
 to eliminate *atemp*.
 
 ``` r
-corr <- dayData %>%
-  select(temp, atemp, windspeed, hum) %>%
+corr <- dayData %>% 
+  select(temp, atemp, windspeed, hum) %>% 
   cor()
 
 corrplot(corr)
@@ -190,15 +187,17 @@ day and rentals on mondays. Fit a line through the points to get a basic
 idea of their relationship.
 
 ``` r
-avgRentals <- dayData %>%
-  group_by(hr) %>%
+avgRentals <- dayData %>% 
+  group_by(hr) %>% 
   summarize(meanRentals = mean(cnt))
 
 corrHour <- cor(avgRentals$hr, avgRentals$meanRentals)
 
 ggplot(avgRentals, aes(x = hr, y = meanRentals)) +
-  geom_point() +
-  labs(title = paste0("Total Rentals on ", paste0(params$day, "s"), " by Hour"), x = "Hour of the Day", y = "Total Rentals") +
+  geom_point() + 
+  labs(title = paste0("Total Rentals on ", paste0(params$day, "s"), " by Hour"), 
+       x = "Hour of the Day", 
+       y = "Total Rentals") + 
   geom_smooth()
 ```
 
@@ -220,16 +219,18 @@ The size of the dots represents the number of observations at each
 temperature.
 
 ``` r
-tempAvg <- dayData %>%
-  group_by(temp) %>%
+tempAvg <- dayData %>% 
+  group_by(temp) %>% 
   summarize(avgRentals = mean(cnt), n = n())
 
 corrTemp <- cor(tempAvg$temp, tempAvg$avgRentals)
 
-ggplot(tempAvg, aes(x = temp, y = avgRentals)) +
-  geom_point(aes(size = n)) +
-  geom_smooth() +
-  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Temperature"), x = "Normalized Temperature", y = "Average Rentals") +
+ggplot(tempAvg, aes(x = temp, y = avgRentals)) + 
+  geom_point(aes(size = n)) + 
+  geom_smooth() + 
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Temperature"), 
+       x = "Normalized Temperature", 
+       y = "Average Rentals") + 
   scale_size_continuous(name = "Number of Obs")
 ```
 
@@ -254,16 +255,18 @@ As already noted, it does not make much sense to keep *atemp* if *temp*
 and *hum* will be in the model, so I eliminated *atemp* from the model.
 
 ``` r
-atempAvg <- dayData %>%
-  group_by(atemp) %>%
+atempAvg <- dayData %>% 
+  group_by(atemp) %>% 
   summarize(avgRentals = mean(cnt), n = n())
 
 corrATemp <- cor(atempAvg$atemp, atempAvg$avgRentals)
 
 ggplot(atempAvg, aes(x = atemp, y = avgRentals)) +
-  geom_point(aes(size = n)) +
-  geom_smooth() +
-  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Felt Temperature"), x = "Normalized Feeling Temperature", y = "Average Rentals") +
+  geom_point(aes(size = n)) + 
+  geom_smooth() + 
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Felt Temperature"), 
+       x = "Normalized Feeling Temperature", 
+       y = "Average Rentals") + 
   scale_size_continuous(name = "Number of Obs")
 ```
 
@@ -286,16 +289,18 @@ The size of the dots represents the number of observations at each
 humidity level.
 
 ``` r
-humAvg <- dayData %>%
-  group_by(hum) %>%
+humAvg <- dayData %>% 
+  group_by(hum) %>% 
   summarize(avgRentals = mean(cnt), n = n())
 
 corrHum <- cor(humAvg$hum, humAvg$avgRentals)
 
-ggplot(humAvg, aes(x = hum, y = avgRentals)) +
-  geom_point(aes(size = n)) +
-  geom_smooth() +
-  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Humidity"), x = "Normalized Humidity", y = "Average Rentals") +
+ggplot(humAvg, aes(x = hum, y = avgRentals)) + 
+  geom_point(aes(size = n)) + 
+  geom_smooth() + 
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Humidity"), 
+       x = "Normalized Humidity", 
+       y = "Average Rentals") + 
   scale_size_continuous(name = "Number of Obs")
 ```
 
@@ -317,16 +322,18 @@ The size of the dots represents the number of observations at each
 windspeed.
 
 ``` r
-windAvg <- dayData %>%
-  group_by(windspeed) %>%
+windAvg <- dayData %>% 
+  group_by(windspeed) %>% 
   summarize(avgRentals = mean(cnt), n = n())
 
 corrWind <- cor(windAvg$windspeed, windAvg$avgRentals)
 
-ggplot(windAvg, aes(x = windspeed, y = avgRentals)) +
-  geom_point(aes(size = n)) +
-  geom_smooth() +
-  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Windspeed"), x = "Normalized Windspeed", y = "Average Rentals") +
+ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + 
+  geom_point(aes(size = n)) + 
+  geom_smooth() + 
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Windspeed"), 
+       x = "Normalized Windspeed", 
+       y = "Average Rentals") + 
   scale_size_continuous(name = "Number of Obs")
 ```
 
@@ -346,15 +353,31 @@ Create a helper function to display basic numeric summaries for a given
 grouping variable.
 
 ``` r
-getSum <- function(varName, colName) {
-  sum <- dayData %>%
-    group_by(dayData[[varName]]) %>%
-    summarize(min = min(cnt), Q1 = quantile(cnt, probs = c(.25), names = FALSE), median = median(cnt), mean = mean(cnt), Q3 = quantile(cnt, probs = c(.75), names = FALSE), max = max(cnt), obs = n())
-
-  output <- sum %>% kable(col.names = c(colName, "Minimum", "1st Quartile", "Median", "Mean", "3rd Quartile", "Maximum", "Number of Observations"))
-
+getSum <- function(varName, colName){ 
+  
+  sum <- dayData %>% 
+    group_by(dayData[[varName]]) %>% 
+    summarize(min = min(cnt), 
+              Q1 = quantile(cnt, probs = c(.25), names = FALSE), 
+              median = median(cnt), 
+              mean = mean(cnt), 
+              Q3 = quantile(cnt, probs = c(.75), names = FALSE), 
+              max = max(cnt), 
+              obs = n())
+  
+  output <- sum %>% 
+    kable(col.names = c(colName, 
+                        "Minimum", 
+                        "1st Quartile", 
+                        "Median", 
+                        "Mean", 
+                        "3rd Quartile", 
+                        "Maximum", 
+                        "Number of Observations"))
+  
   return(output)
-}
+  
+} 
 ```
 
 ### Season
@@ -378,9 +401,11 @@ getSum(varName = "season", colName = "Season")
 | fall   |       2 |        47.75 |  166.0 | 203.6167 |       302.00 |     922 |                    600 |
 
 ``` r
-ggplot(dayData, aes(x = season, y = cnt)) +
-  geom_boxplot() +
-  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Season"), x = "Season", y = "Number of Rentals")
+ggplot(dayData, aes(x = season, y = cnt)) + 
+  geom_boxplot() + 
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Season"), 
+       x = "Season", 
+       y = "Number of Rentals") 
 ```
 
 ![](Monday_files/figure-gfm/Season-1.png)<!-- -->
@@ -392,8 +417,8 @@ trend in bike rentals on mondays. It would be helpful to have data from
 more years, though.
 
 ``` r
-yearSum <- dayData %>%
-  group_by(yr) %>%
+yearSum <- dayData %>% 
+  group_by(yr) %>% 
   summarize(totalRentals = sum(cnt))
 
 yearSum %>% kable(col.names = c("Year", "Total Rentals"))
@@ -406,7 +431,9 @@ yearSum %>% kable(col.names = c("Year", "Total Rentals"))
 
 ### Month
 
-Explore how bike rentals on mondays change depending on the month.
+Explore how bike rentals on mondays change depending on the month using
+a basic numeric summary and a boxplot. The boxplot can be used to
+identify outliers.
 
 As already noted, it is probably not worth including *mnth* and *season*
 in the model, so *season* has been eliminated.
@@ -431,9 +458,11 @@ getSum(varName = "mnth", colName = "Month")
 | dec   |       1 |        23.25 |  113.0 | 147.09813 |       213.25 |     731 |                    214 |
 
 ``` r
-ggplot(dayData, aes(x = mnth, y = cnt)) +
-  geom_boxplot() +
-  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Month"), x = "Month", y = "Number of Rentals")
+ggplot(dayData, aes(x = mnth, y = cnt)) + 
+  geom_boxplot() + 
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Month"), 
+       x = "Month", 
+       y = "Number of Rentals")
 ```
 
 ![](Monday_files/figure-gfm/Month-1.png)<!-- -->
@@ -441,11 +470,12 @@ ggplot(dayData, aes(x = mnth, y = cnt)) +
 ### Holiday
 
 Explore how bike rentals change depending on whether the monday in
-question is a holiday.
+question is a holiday using a basic numeric summary and a boxplot. The
+boxplot can be used to identify outliers.
 
 Note: There are no holidays on Saturday or Sunday because the holiday
-data has been extracted from the [Washington D.C. HR Department’s
-Holiday Schedule](https://dchr.dc.gov/page/holiday-schedules), which
+data has been extracted from the [Washington D.C. HR department’s
+holiday schedule](https://dchr.dc.gov/page/holiday-schedules), which
 only lists holidays that fall during the work week.
 
 ``` r
@@ -458,9 +488,11 @@ getSum(varName = "holiday", colName = "Holiday")
 | yes     |       1 |           31 |  100.0 | 166.9608 |       281.00 |     712 |                    357 |
 
 ``` r
-ggplot(dayData, aes(x = holiday, y = cnt)) +
-  geom_boxplot() +
-  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Holiday"), x = "Is it a Holiday?", y = "Number of Rentals")
+ggplot(dayData, aes(x = holiday, y = cnt)) + 
+  geom_boxplot() + 
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Holiday"), 
+       x = "Is it a Holiday?", 
+       y = "Number of Rentals")
 ```
 
 ![](Monday_files/figure-gfm/Holiday-1.png)<!-- -->
@@ -468,7 +500,8 @@ ggplot(dayData, aes(x = holiday, y = cnt)) +
 ### Working Day
 
 Explore how bike rentals change depending on whether the day in question
-is a working day.
+is a working day using a basic numeric summary and a boxplot. The
+boxplot can be used to identify outliers.
 
 Working days are neither weekends nor holidays. I decided not to keep
 this variable in the model because it wouldn’t make much sense in the
@@ -485,15 +518,19 @@ getSum(varName = "workingday", colName = "Working Day")
 
 ``` r
 ggplot(dayData, aes(x = workingday, y = cnt)) +
-  geom_boxplot() +
-  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Working Day"), x = "Is it a Working Day?", y = "Number of Rentals")
+  geom_boxplot() + 
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Working Day"), 
+       x = "Is it a Working Day?", 
+       y = "Number of Rentals")
 ```
 
 ![](Monday_files/figure-gfm/Workingday-1.png)<!-- -->
 
 ### Weather Condition
 
-Explore how bike rentals on mondays change depending on the weather.
+Explore how bike rentals on mondays change depending on the weather
+using a basic numeric summary and a boxplot. The boxplot can be used to
+identify outliers.
 
 ``` r
 getSum(varName = "weathersit", colName = "Weather Condition")
@@ -508,8 +545,10 @@ getSum(varName = "weathersit", colName = "Weather Condition")
 
 ``` r
 ggplot(dayData, aes(x = weathersit, y = cnt)) +
-  geom_boxplot() +
-  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Weather Condition"), x = "What is the Weather Like?", y = "Number of Rentals")
+  geom_boxplot() + 
+  labs(title = paste0("Rentals on ", paste0(params$day, "s"), " by Weather Condition"), 
+       x = "What is the Weather Like?", 
+       y = "Number of Rentals")
 ```
 
 ![](Monday_files/figure-gfm/Weather-1.png)<!-- -->
@@ -526,10 +565,10 @@ used to build the models, and the test set is used to evaluate them.
 
 ``` r
 set.seed(123)
-trainIndex <- createDataPartition(dayData$cnt, p = .75, list = FALSE)
+trainIndex <- createDataPartition(dayData$cnt, p = .7, list = FALSE)
 
-train <- dayData[trainIndex, ]
-test <- dayData[-trainIndex, ]
+train <- dayData[trainIndex,]
+test <- dayData[-trainIndex,]
 ```
 
 ## Non-Ensemble Tree
@@ -589,18 +628,17 @@ I used the *caret* package to test 10 different values of *cp*.
 
 ``` r
 set.seed(123)
-tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed,
-  data = train,
-  method = "rpart",
-  trControl = trainControl(method = "LOOCV"),
-  tuneLength = 10
-)
+tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+              data = train, 
+              method = "rpart", 
+              trControl = trainControl(method = "LOOCV"), 
+              tuneLength = 10)
 ```
 
 ### Model Information
 
-My final non-ensemble tree model uses a *cp* of 0.010024. Its root mean
-square error on the training set is 91.680588.
+My final non-ensemble tree model uses a *cp* of 0.0090975. Its root mean
+square error on the training set is 92.1064636.
 
 More information about this model is below.
 
@@ -610,42 +648,42 @@ tree
 
     ## CART 
     ## 
-    ## 1861 samples
+    ## 1737 samples
     ##    8 predictor
     ## 
     ## No pre-processing
     ## Resampling: Leave-One-Out Cross-Validation 
-    ## Summary of sample sizes: 1860, 1860, 1860, 1860, 1860, 1860, ... 
+    ## Summary of sample sizes: 1736, 1736, 1736, 1736, 1736, 1736, ... 
     ## Resampling results across tuning parameters:
     ## 
-    ##   cp          RMSE       Rsquared   
-    ##   0.01002396   91.68059  0.736808968
-    ##   0.01170396   94.43217  0.720882032
-    ##   0.01450317   98.07957  0.699266415
-    ##   0.01624757  101.62708  0.677458370
-    ##   0.01904042  103.23845  0.666603834
-    ##   0.02545625  106.80785  0.643069651
-    ##   0.04009360  115.01349  0.587573648
-    ##   0.04386094  120.88178  0.543627619
-    ##   0.09181217  158.25327  0.240514642
-    ##   0.30998206  183.31033  0.001518581
+    ##   cp           RMSE       Rsquared   
+    ##   0.009097489   92.10646  0.741114351
+    ##   0.009201394   92.40338  0.739339338
+    ##   0.014605347  101.97007  0.683146088
+    ##   0.015984558  100.40490  0.692212872
+    ##   0.016840713  105.03346  0.663572296
+    ##   0.028104739  116.70417  0.585312711
+    ##   0.028394545  115.48244  0.593375831
+    ##   0.039063065  120.29923  0.559516925
+    ##   0.093708081  165.06099  0.209623759
+    ##   0.307902102  185.46134  0.001849726
     ##   MAE      
-    ##    64.05176
-    ##    65.68724
-    ##    67.41869
-    ##    69.45327
-    ##    73.75840
-    ##    73.82818
-    ##    78.58254
-    ##    84.21021
-    ##   114.85357
-    ##   158.63178
+    ##    63.39225
+    ##    63.90371
+    ##    72.30808
+    ##    69.79485
+    ##    75.78070
+    ##    81.97684
+    ##    80.33306
+    ##    83.15185
+    ##   119.95018
+    ##   159.71931
     ## 
     ## RMSE was used to select the
     ##  optimal model using the
     ##  smallest value.
     ## The final value used for the model
-    ##  was cp = 0.01002396.
+    ##  was cp = 0.009097489.
 
 ``` r
 plot(tree$finalModel)
@@ -687,21 +725,18 @@ parameters.
 #### Create the Model
 
 ``` r
-tuneGr <- expand.grid(
-  n.trees = seq(from = 50, to = 150, by = 50),
-  interaction.depth = 1:3,
-  shrinkage = seq(from = .05, to = .15, by = .05),
-  n.minobsinnode = 9:11
-)
+tuneGr <- expand.grid(n.trees = seq(from = 50, to = 150, by = 50), 
+                     interaction.depth = 1:3, 
+                     shrinkage = seq(from = .05, to = .15, by = .05), 
+                     n.minobsinnode = 9:11)
 
 set.seed(123)
-boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed,
-  data = train,
-  method = "gbm",
-  trControl = trainControl(method = "cv", number = 10),
-  tuneGrid = tuneGr,
-  verbose = FALSE
-)
+boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+                   data = train, 
+                   method = "gbm", 
+                   trControl = trainControl(method = "cv", number = 10),
+                   tuneGrid = tuneGr, 
+                   verbose = FALSE)
 ```
 
 ### Model Information
@@ -713,7 +748,7 @@ My final boosted tree model uses the following tuning parameters:
   - *shrinkage*: 0.15  
   - *n.minobsinnode*: 9
 
-Its root mean square error on the training set is 57.0440941.
+Its root mean square error on the training set is 58.0090856.
 
 More information about this model is below.
 
@@ -723,12 +758,12 @@ boostTree
 
     ## Stochastic Gradient Boosting 
     ## 
-    ## 1861 samples
+    ## 1737 samples
     ##    8 predictor
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 1673, 1676, 1676, 1676, 1675, 1674, ... 
+    ## Summary of sample sizes: 1563, 1564, 1563, 1564, 1564, 1564, ... 
     ## Resampling results across tuning parameters:
     ## 
     ##   shrinkage  interaction.depth
@@ -814,169 +849,169 @@ boostTree
     ##   0.15       3                
     ##   0.15       3                
     ##   n.minobsinnode  n.trees  RMSE     
-    ##    9               50      137.55003
-    ##    9              100      123.22858
-    ##    9              150      115.09069
-    ##   10               50      137.39169
-    ##   10              100      123.18282
-    ##   10              150      115.16567
-    ##   11               50      137.58709
-    ##   11              100      123.29458
-    ##   11              150      115.11843
-    ##    9               50      114.09371
-    ##    9              100       95.77047
-    ##    9              150       84.70631
-    ##   10               50      114.17622
-    ##   10              100       95.53792
-    ##   10              150       84.77462
-    ##   11               50      113.48263
-    ##   11              100       95.72042
-    ##   11              150       84.85769
-    ##    9               50       98.90390
-    ##    9              100       79.83885
-    ##    9              150       70.87663
-    ##   10               50       98.83380
-    ##   10              100       79.77644
-    ##   10              150       70.91961
-    ##   11               50       99.55160
-    ##   11              100       79.64698
-    ##   11              150       70.89404
-    ##    9               50      122.87910
-    ##    9              100      109.85256
-    ##    9              150      103.24703
-    ##   10               50      122.71781
-    ##   10              100      109.77019
-    ##   10              150      103.09582
-    ##   11               50      122.91049
-    ##   11              100      109.93885
-    ##   11              150      103.11486
-    ##    9               50       95.24820
-    ##    9              100       80.03764
-    ##    9              150       75.84642
-    ##   10               50       95.48420
-    ##   10              100       79.84924
-    ##   10              150       75.32490
-    ##   11               50       95.06943
-    ##   11              100       80.33930
-    ##   11              150       75.60892
-    ##    9               50       79.63701
-    ##    9              100       66.43670
-    ##    9              150       61.63306
-    ##   10               50       79.66298
-    ##   10              100       66.96900
-    ##   10              150       61.93083
-    ##   11               50       79.31985
-    ##   11              100       66.14641
-    ##   11              150       61.49906
-    ##    9               50      114.79123
-    ##    9              100      103.01025
-    ##    9              150       96.58062
-    ##   10               50      114.38388
-    ##   10              100      103.14311
-    ##   10              150       96.66975
-    ##   11               50      114.32073
-    ##   11              100      102.88648
-    ##   11              150       96.50800
-    ##    9               50       84.10858
-    ##    9              100       75.34206
-    ##    9              150       72.21469
-    ##   10               50       84.06443
-    ##   10              100       74.39599
-    ##   10              150       72.04664
-    ##   11               50       84.83132
-    ##   11              100       75.39821
-    ##   11              150       71.90932
-    ##    9               50       71.06654
-    ##    9              100       61.08306
-    ##    9              150       57.04409
-    ##   10               50       70.23917
-    ##   10              100       61.46696
-    ##   10              150       57.87642
-    ##   11               50       71.84150
-    ##   11              100       61.79387
-    ##   11              150       57.83672
+    ##    9               50      139.10699
+    ##    9              100      124.14296
+    ##    9              150      115.44256
+    ##   10               50      139.17850
+    ##   10              100      124.13518
+    ##   10              150      115.46802
+    ##   11               50      139.04073
+    ##   11              100      123.99270
+    ##   11              150      115.36211
+    ##    9               50      113.26356
+    ##    9              100       95.75593
+    ##    9              150       85.27838
+    ##   10               50      113.46989
+    ##   10              100       95.25869
+    ##   10              150       85.32323
+    ##   11               50      113.01675
+    ##   11              100       95.92753
+    ##   11              150       85.29720
+    ##    9               50       99.87898
+    ##    9              100       80.48751
+    ##    9              150       71.53177
+    ##   10               50       99.37903
+    ##   10              100       80.86046
+    ##   10              150       71.47324
+    ##   11               50       99.25140
+    ##   11              100       80.93101
+    ##   11              150       71.51527
+    ##    9               50      123.97624
+    ##    9              100      109.89606
+    ##    9              150      103.05656
+    ##   10               50      123.67853
+    ##   10              100      109.78544
+    ##   10              150      103.03410
+    ##   11               50      123.89323
+    ##   11              100      110.02529
+    ##   11              150      103.03399
+    ##    9               50       94.76740
+    ##    9              100       80.03984
+    ##    9              150       75.09228
+    ##   10               50       95.37636
+    ##   10              100       80.20246
+    ##   10              150       75.63760
+    ##   11               50       94.94776
+    ##   11              100       80.39293
+    ##   11              150       75.75371
+    ##    9               50       80.74620
+    ##    9              100       67.06186
+    ##    9              150       62.13539
+    ##   10               50       80.59360
+    ##   10              100       67.54049
+    ##   10              150       61.93553
+    ##   11               50       80.55644
+    ##   11              100       66.87907
+    ##   11              150       61.65631
+    ##    9               50      114.96371
+    ##    9              100      102.58442
+    ##    9              150       96.08466
+    ##   10               50      115.05071
+    ##   10              100      102.84892
+    ##   10              150       96.44169
+    ##   11               50      114.97007
+    ##   11              100      102.75450
+    ##   11              150       96.39704
+    ##    9               50       84.43799
+    ##    9              100       75.34297
+    ##    9              150       71.86133
+    ##   10               50       84.34552
+    ##   10              100       74.92577
+    ##   10              150       72.19121
+    ##   11               50       84.14866
+    ##   11              100       75.59430
+    ##   11              150       72.51875
+    ##    9               50       71.70147
+    ##    9              100       62.51294
+    ##    9              150       58.00909
+    ##   10               50       71.89154
+    ##   10              100       62.23050
+    ##   10              150       58.36406
+    ##   11               50       72.60173
+    ##   11              100       62.86697
+    ##   11              150       58.73145
     ##   Rsquared   MAE     
-    ##   0.4908859  98.75202
-    ##   0.5842294  85.91673
-    ##   0.6254754  80.22156
-    ##   0.4955028  98.61730
-    ##   0.5861514  85.89159
-    ##   0.6251353  80.39236
-    ##   0.4877451  98.73717
-    ##   0.5828582  85.88534
-    ##   0.6252922  80.31143
-    ##   0.6594547  79.02540
-    ##   0.7403665  64.17484
-    ##   0.7921508  57.57481
-    ##   0.6580560  78.92721
-    ##   0.7430947  64.17712
-    ##   0.7917403  57.60565
-    ##   0.6613878  78.54138
-    ##   0.7404145  64.18776
-    ##   0.7910877  57.83483
-    ##   0.7515052  68.83259
-    ##   0.8210521  53.66847
-    ##   0.8547321  47.73108
-    ##   0.7528302  68.94384
-    ##   0.8219106  53.78584
-    ##   0.8548792  47.85714
-    ##   0.7485101  69.36639
-    ##   0.8225549  53.88629
-    ##   0.8544412  47.97073
-    ##   0.5860221  85.70126
-    ##   0.6517833  76.72249
-    ##   0.6892091  72.18530
-    ##   0.5865690  85.66397
-    ##   0.6500673  76.73449
-    ##   0.6903041  72.11464
-    ##   0.5853582  85.85644
-    ##   0.6486216  76.94574
-    ##   0.6917159  72.10557
-    ##   0.7434558  64.05690
-    ##   0.8094952  54.80271
-    ##   0.8246368  52.09068
-    ##   0.7413825  64.10214
-    ##   0.8100921  54.62861
-    ##   0.8270507  51.82674
-    ##   0.7431840  64.00136
-    ##   0.8070678  55.04447
-    ##   0.8253252  51.95399
-    ##   0.8209763  53.82105
-    ##   0.8681209  44.70894
-    ##   0.8840857  41.38204
-    ##   0.8225008  53.92764
-    ##   0.8661716  45.30428
-    ##   0.8831574  41.73557
-    ##   0.8231524  53.52710
-    ##   0.8696646  44.70416
-    ##   0.8848603  41.34036
-    ##   0.6238145  80.31364
-    ##   0.6905866  72.01765
-    ##   0.7240202  68.03704
-    ##   0.6288750  79.93547
-    ##   0.6882989  71.85884
-    ##   0.7233181  67.79618
-    ##   0.6297571  79.67864
-    ##   0.6910490  72.02553
-    ##   0.7230864  67.75657
-    ##   0.7940018  57.36716
-    ##   0.8267542  51.67797
-    ##   0.8386079  49.48575
-    ##   0.7942502  57.16369
-    ##   0.8308993  51.09624
-    ##   0.8397093  49.51718
-    ##   0.7909102  57.69262
-    ##   0.8266958  51.98223
-    ##   0.8405146  49.09154
-    ##   0.8522177  48.20935
-    ##   0.8862213  41.32485
-    ##   0.9000814  38.44021
-    ##   0.8544294  47.04723
-    ##   0.8845263  41.26667
-    ##   0.8971003  38.43335
-    ##   0.8476479  48.15892
-    ##   0.8829261  41.67166
-    ##   0.8966448  38.73541
+    ##   0.4917589  99.16546
+    ##   0.5948604  86.46193
+    ##   0.6348989  80.34819
+    ##   0.4920665  99.17143
+    ##   0.5947841  86.29446
+    ##   0.6346048  80.28660
+    ##   0.4988459  99.14135
+    ##   0.5945396  86.10643
+    ##   0.6358622  80.20841
+    ##   0.6744069  78.54172
+    ##   0.7437194  64.34446
+    ##   0.7923848  58.01926
+    ##   0.6758476  78.74227
+    ##   0.7471785  64.14967
+    ##   0.7926921  58.04420
+    ##   0.6797561  78.39206
+    ##   0.7433892  64.51274
+    ##   0.7927797  57.97247
+    ##   0.7476982  69.15679
+    ##   0.8202186  54.45384
+    ##   0.8530196  48.49838
+    ##   0.7496427  68.84031
+    ##   0.8177818  54.68518
+    ##   0.8527619  48.46698
+    ##   0.7526865  69.13581
+    ##   0.8174557  54.65120
+    ##   0.8528877  48.43574
+    ##   0.5935182  86.29763
+    ##   0.6584907  76.78557
+    ##   0.6956395  72.14936
+    ##   0.5978181  86.03787
+    ##   0.6604753  76.54889
+    ##   0.6958958  72.10293
+    ##   0.5950989  86.11530
+    ##   0.6587149  76.80454
+    ##   0.6963856  72.10194
+    ##   0.7492786  63.71971
+    ##   0.8125464  54.96521
+    ##   0.8309288  51.86737
+    ##   0.7465566  64.29788
+    ##   0.8108710  55.15567
+    ##   0.8280072  52.23379
+    ##   0.7469012  63.94186
+    ##   0.8110463  55.19537
+    ##   0.8278348  52.14205
+    ##   0.8176043  54.38676
+    ##   0.8667430  45.43656
+    ##   0.8841140  42.00612
+    ##   0.8169992  54.38813
+    ##   0.8650108  45.63445
+    ##   0.8848741  41.90538
+    ##   0.8183353  54.15392
+    ##   0.8678704  45.53707
+    ##   0.8854535  41.82156
+    ##   0.6354696  80.27786
+    ##   0.6984019  72.24020
+    ##   0.7308919  67.83141
+    ##   0.6354221  80.02811
+    ##   0.6979313  71.97095
+    ##   0.7286301  67.92684
+    ##   0.6344673  80.05610
+    ##   0.6967385  71.92872
+    ##   0.7295601  67.62822
+    ##   0.7958779  57.75745
+    ##   0.8297827  52.12573
+    ##   0.8435770  49.59563
+    ##   0.7942972  57.55832
+    ##   0.8313117  51.69256
+    ##   0.8425347  49.66194
+    ##   0.7963517  57.92338
+    ##   0.8284746  52.06919
+    ##   0.8406917  49.85969
+    ##   0.8513863  48.58967
+    ##   0.8825897  42.38139
+    ##   0.8980189  39.38276
+    ##   0.8505190  49.00315
+    ##   0.8837465  42.26579
+    ##   0.8968884  39.44377
+    ##   0.8461003  49.12370
+    ##   0.8809712  42.43801
+    ##   0.8954142  39.53783
     ## 
     ## RMSE was used to select the
     ##  optimal model using the
@@ -1001,15 +1036,17 @@ treeRMSE <- postResample(treePreds, test$cnt)[1]
 boostPreds <- predict(boostTree, test)
 boostRMSE <- postResample(boostPreds, test$cnt)[1]
 
-modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), trainRMSE = c(min(tree$results$RMSE), min(boostTree$results$RMSE)), testRMSE = c(treeRMSE, boostRMSE))
+modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), 
+                               trainRMSE = c(min(tree$results$RMSE), min(boostTree$results$RMSE)), 
+                               testRMSE = c(treeRMSE, boostRMSE))
 
 modelPerformance %>% kable(col.names = c("Model", "Train RMSE", "Test RMSE"))
 ```
 
 | Model             | Train RMSE | Test RMSE |
 | :---------------- | ---------: | --------: |
-| Non-Ensemble Tree |   91.68059 |  96.88941 |
-| Boosted Tree      |   57.04409 |  58.29972 |
+| Non-Ensemble Tree |   92.10646 |  93.87214 |
+| Boosted Tree      |   58.00909 |  55.71787 |
 
 # Best Model
 
@@ -1024,11 +1061,11 @@ RMSE on the test set.
 The boosted tree model is saved to the `final` object below.
 
 ``` r
-if (best$model == "Non-Ensemble Tree") {
+if(best$model == "Non-Ensemble Tree"){
   final <- tree
-} else if (best$model == "Boosted Tree") {
+} else if(best$model == "Boosted Tree"){
   final <- boostTree
-} else {
+} else{
   stop("Error")
 }
 
@@ -1037,4 +1074,4 @@ final$finalModel
 
     ## A gradient boosted model with gaussian loss function.
     ## 150 iterations were performed.
-    ## There were 20 predictors of which 18 had non-zero influence.
+    ## There were 20 predictors of which 19 had non-zero influence.
