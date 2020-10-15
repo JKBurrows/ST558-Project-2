@@ -9,7 +9,7 @@ This data has been made available by [the UCI Machine Learning
 Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
 
 My analysis makes use of the following packages: *knitr*, *rmarkdown*,
-*tidyverse*, *caret*, *corrplot*, and *shiny*.
+*tidyverse*, *caret*, *corrplot*, *shiny*, and *rpart.plot*.
 
 # Models
 
@@ -51,5 +51,9 @@ params = lapply(days, FUN = function(x){list(day = x)})
 
 reports <- tibble(output_file, params)
 
-apply(reports, MARGIN = 1, FUN = function(x){render(input = "./BurrowsProject2Analysis.Rmd", output_file = x[[1]], params = x[[2]])})
+apply(reports, 
+      MARGIN = 1, 
+      FUN = function(x){render(input = "./BurrowsProject2Analysis.Rmd", 
+                               output_file = x[[1]], 
+                               params = x[[2]])})
 ```

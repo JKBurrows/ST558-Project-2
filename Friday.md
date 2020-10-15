@@ -212,7 +212,7 @@ measure.
 ### Temperature
 
 Create a scatter plot to investigate the relationship between
-temperature and number of rentals on fridays. Fit a line through the
+temperature and average rentals on fridays. Fit a line through the
 points to get a basic idea of their relationship.
 
 The size of the dots represents the number of observations at each
@@ -245,11 +245,11 @@ measure.
 ### Felt Temperature
 
 Create a scatter plot to investigate the relationship between felt
-temperature and number of rentals on fridays. Fit a line through the
+temperature and average rentals on fridays. Fit a line through the
 points to get a basic idea of their relationship.
 
 The size of the dots represents the number of observations at each felt
-temperatrure.
+temperature.
 
 As already noted, it does not make much sense to keep *atemp* if *temp*
 and *hum* will be in the model, so I eliminated *atemp* from the model.
@@ -282,7 +282,7 @@ measure.
 ### Humidity
 
 Create a scatter plot to investigate the relationship between humidity
-and number of rentals on fridays. Fit a line through the points to get a
+and average rentals on fridays. Fit a line through the points to get a
 basic idea of their relationship.
 
 The size of the dots represents the number of observations at each
@@ -315,7 +315,7 @@ measure.
 ### Windspeed
 
 Create a scatter plot to investigate the relationship between windspeed
-and number of rentals on fridays. Fit a line through the points to get a
+and average rentals on fridays. Fit a line through the points to get a
 basic idea of their relationship.
 
 The size of the dots represents the number of observations at each
@@ -383,8 +383,9 @@ getSum <- function(varName, colName){
 ### Season
 
 Explore how bike rentals on fridays change with the seasons using a
-basic numeric summary and a boxplot. The boxplot can be used to identify
-outliers.
+basic numeric summary and a boxplot. The numeric summary gives you an
+idea of center and spread. So does the boxplot, but it is better for
+identifying outliers.
 
 It does not make much sense to keep both *season* and *mnth* in the
 model, so I decided to eliminate *season*.
@@ -432,8 +433,9 @@ yearSum %>% kable(col.names = c("Year", "Total Rentals"))
 ### Month
 
 Explore how bike rentals on fridays change depending on the month using
-a basic numeric summary and a boxplot. The boxplot can be used to
-identify outliers.
+a basic numeric summary and a boxplot. The numeric summary gives you an
+idea of center and spread. So does the boxplot, but it is better for
+identifying outliers.
 
 As already noted, it is probably not worth including *mnth* and *season*
 in the model, so *season* has been eliminated.
@@ -471,7 +473,8 @@ ggplot(dayData, aes(x = mnth, y = cnt)) +
 
 Explore how bike rentals change depending on whether the friday in
 question is a holiday using a basic numeric summary and a boxplot. The
-boxplot can be used to identify outliers.
+numeric summary gives you an idea of center and spread. So does the
+boxplot, but it is better for identifying outliers.
 
 Note: There are no holidays on Saturday or Sunday because the holiday
 data has been extracted from the [Washington D.C. HR department’s
@@ -501,7 +504,8 @@ ggplot(dayData, aes(x = holiday, y = cnt)) +
 
 Explore how bike rentals change depending on whether the day in question
 is a working day using a basic numeric summary and a boxplot. The
-boxplot can be used to identify outliers.
+numeric summary gives you an idea of center and spread. So does the
+boxplot, but it is better for identifying outliers.
 
 Working days are neither weekends nor holidays. I decided not to keep
 this variable in the model because it wouldn’t make much sense in the
@@ -529,8 +533,9 @@ ggplot(dayData, aes(x = workingday, y = cnt)) +
 ### Weather Condition
 
 Explore how bike rentals on fridays change depending on the weather
-using a basic numeric summary and a boxplot. The boxplot can be used to
-identify outliers.
+using a basic numeric summary and a boxplot. The numeric summary gives
+you an idea of center and spread. So does the boxplot, but it is better
+for identifying outliers.
 
 ``` r
 getSum(varName = "weathersit", colName = "Weather Condition")
@@ -685,8 +690,7 @@ tree
     ##  was cp = 0.01564246.
 
 ``` r
-plot(tree$finalModel)
-text(tree$finalModel)
+rpart.plot(tree$finalModel)
 ```
 
 ![](Friday_files/figure-gfm/Train%20Tree%20Info-1.png)<!-- -->

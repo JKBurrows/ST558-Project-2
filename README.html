@@ -604,7 +604,7 @@ body {
 <p>16 October 2020</p>
 <h1 id="introduction">Introduction</h1>
 <p>For this project, I analyzed data about the Capital bike sharing system. This data has been made available by <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset">the UCI Machine Learning Library</a>.</p>
-<p>My analysis makes use of the following packages: <em>knitr</em>, <em>rmarkdown</em>, <em>tidyverse</em>, <em>caret</em>, <em>corrplot</em>, and <em>shiny</em>.</p>
+<p>My analysis makes use of the following packages: <em>knitr</em>, <em>rmarkdown</em>, <em>tidyverse</em>, <em>caret</em>, <em>corrplot</em>, <em>shiny</em>, and <em>rpart.plot</em>.</p>
 <h1 id="models">Models</h1>
 <p>I built models to predict the number of bikes that will be rented for a given day of the week. Predictor variables include:</p>
 <ul>
@@ -636,7 +636,11 @@ body {
 <span id="cb1-11"><a href="#cb1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12"></a>reports &lt;-<span class="st"> </span><span class="kw">tibble</span>(output_file, params)</span>
 <span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="kw">apply</span>(reports, <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> <span class="cf">function</span>(x){<span class="kw">render</span>(<span class="dt">input =</span> <span class="st">&quot;./BurrowsProject2Analysis.Rmd&quot;</span>, <span class="dt">output_file =</span> x[[<span class="dv">1</span>]], <span class="dt">params =</span> x[[<span class="dv">2</span>]])})</span></code></pre></div>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="kw">apply</span>(reports, </span>
+<span id="cb1-15"><a href="#cb1-15"></a>      <span class="dt">MARGIN =</span> <span class="dv">1</span>, </span>
+<span id="cb1-16"><a href="#cb1-16"></a>      <span class="dt">FUN =</span> <span class="cf">function</span>(x){<span class="kw">render</span>(<span class="dt">input =</span> <span class="st">&quot;./BurrowsProject2Analysis.Rmd&quot;</span>, </span>
+<span id="cb1-17"><a href="#cb1-17"></a>                               <span class="dt">output_file =</span> x[[<span class="dv">1</span>]], </span>
+<span id="cb1-18"><a href="#cb1-18"></a>                               <span class="dt">params =</span> x[[<span class="dv">2</span>]])})</span></code></pre></div>
 
 </body>
 </html>
