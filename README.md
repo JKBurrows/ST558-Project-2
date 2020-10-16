@@ -4,8 +4,9 @@ Joshua Burrows Project 2
 
 # Introduction
 
-For this project, I analyzed data about the Capital bike sharing system.
-This data has been made available by [the UCI Machine Learning
+The purpose of this project is to analyze data about the Capital bike
+sharing system. This data can be accessed through [the UCI Machine
+Learning
 Library](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset).
 
 My analysis makes use of the following packages: *knitr*, *rmarkdown*,
@@ -13,15 +14,16 @@ My analysis makes use of the following packages: *knitr*, *rmarkdown*,
 
 # Models
 
-I built models to predict the number of bikes that will be rented for a
-given day of the week. Predictor variables include:
+I built models to predict number of bikes rented. Predictor variables
+include:
 
   - Year and month of the rental  
   - Hour of the day  
-  - Weather, temperature, humidity, and windspeed  
+  - Weather, temperature, humidity, and wind speed  
   - Whether the day is a holiday
 
-The analysis for each day of the week can be viewed here:
+My analysis is divided up by day of the week. The analysis for each day
+can be viewed here:
 
 [Sunday](Sunday.md)  
 [Monday](Monday.md)  

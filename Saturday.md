@@ -15,7 +15,7 @@ Joshua Burrows Project 2
           - [Temperature](#temperature)
           - [Felt Temperature](#felt-temperature)
           - [Humidity](#humidity)
-          - [Windspeed](#windspeed)
+          - [Wind Speed](#wind-speed)
       - [Categorical Predictors](#categorical-predictors)
           - [Helper Function](#helper-function)
           - [Season](#season)
@@ -30,6 +30,7 @@ Joshua Burrows Project 2
           - [Training](#training)
               - [Tree Models](#tree-models)
               - [Tuning Parameter](#tuning-parameter)
+              - [Formula](#formula)
               - [Create the Model](#create-the-model)
           - [Model Information](#model-information)
       - [Boosted Tree](#boosted-tree)
@@ -44,7 +45,7 @@ Joshua Burrows Project 2
 # Bike Rentals on Saturdays: Introduction
 
 This document walks though the process of creating a model to predict
-hourly bike rentals on saturdays. I compared two models - a
+hourly bike rentals on Saturdays. I compared two models - a
 *non-ensemble tree* and a *boosted tree* - and picked the one that does
 better.
 
@@ -55,11 +56,11 @@ well as information about the weather and the time of year.
 
 My models use the following predictor variables:
 
-  - yr: year (2011 or 2012)  
-  - mnth: month  
-  - hr: hour of the day  
-  - holiday: whether the day is a holiday  
-  - weathersit: weather condition
+  - *yr*: year (2011 or 2012)  
+  - *mnth*: month  
+  - *hr*: hour of the day  
+  - *holiday*: whether the day is a holiday  
+  - *weathersit*: weather condition
       - pleasant: clear, few clouds, partly cloudy  
       - less pleasant: mist, mist + cloudy, mist + broken clouds, mist +
         few clouds  
@@ -67,12 +68,13 @@ My models use the following predictor variables:
         light rain + thunderstorm + scattered clouds  
       - downright unpleasant: snow + fog, heavy rain + ice pallets +
         thunderstorm + mist  
-  - temp: normalized temperature in celsius  
-  - hum: normalized humidity  
-  - windspeed: normalized windspeed
+  - *temp*: normalized temperature in celsius  
+  - *hum*: normalized humidity  
+  - *windspeed*: normalized wind speed
 
 You can return to the homepage for this project by clicking
-[here](README.md).
+[here](README.md). The github repo for this project is
+[here](https://github.com/JKBurrows/ST558-Project-2).
 
 # Read in Data
 
@@ -135,7 +137,7 @@ bikes %>% head() %>% kable()
 
 ## Filter by Day
 
-Grab the data for saturday.
+Grab the data for Saturday.
 
 ``` r
 dayData <- bikes %>% filter(weekday == params$day)
@@ -184,8 +186,8 @@ corrplot(corr)
 ### Hour
 
 Create a scatter plot to investigate the relationship between time of
-day and rentals on saturdays. Fit a line through the points to get a
-basic idea of their relationship.
+day and rentals on Saturdays. Fit a line through the points to get a
+basic idea of how number or rentals changes with the time of day.
 
 ``` r
 avgRentals <- dayData %>% 
@@ -213,8 +215,8 @@ measure.
 ### Temperature
 
 Create a scatter plot to investigate the relationship between
-temperature and average rentals on saturdays. Fit a line through the
-points to get a basic idea of their relationship.
+temperature and average rentals on Saturdays. Fit a line through the
+points to get a basic idea of average rentals changes with temperature.
 
 The size of the dots represents the number of observations at each
 temperature.
@@ -246,8 +248,9 @@ measure.
 ### Felt Temperature
 
 Create a scatter plot to investigate the relationship between felt
-temperature and average rentals on saturdays. Fit a line through the
-points to get a basic idea of their relationship.
+temperature and average rentals on Saturdays. Fit a line through the
+points to get a basic idea of how average rentals changes with felt
+temperature.
 
 The size of the dots represents the number of observations at each felt
 temperature.
@@ -283,8 +286,8 @@ measure.
 ### Humidity
 
 Create a scatter plot to investigate the relationship between humidity
-and average rentals on saturdays. Fit a line through the points to get a
-basic idea of their relationship.
+and average rentals on Saturdays. Fit a line through the points to get a
+basic idea of how average rentals changes with humidity.
 
 The size of the dots represents the number of observations at each
 humidity level.
@@ -313,14 +316,14 @@ Be careful, correlation measures straight line relationships, so if the
 plot above shows a curved relationship, correlation may not be a useful
 measure.
 
-### Windspeed
+### Wind Speed
 
-Create a scatter plot to investigate the relationship between windspeed
-and average rentals on saturdays. Fit a line through the points to get a
-basic idea of their relationship.
+Create a scatter plot to investigate the relationship between wind speed
+and average rentals on Saturdays. Fit a line through the points to get a
+basic idea of how average rentals changes with wind speed.
 
-The size of the dots represents the number of observations at each
-windspeed.
+The size of the dots represents the number of observations at each wind
+speed.
 
 ``` r
 windAvg <- dayData %>% 
@@ -332,15 +335,15 @@ corrWind <- cor(windAvg$windspeed, windAvg$avgRentals)
 ggplot(windAvg, aes(x = windspeed, y = avgRentals)) + 
   geom_point(aes(size = n)) + 
   geom_smooth() + 
-  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Windspeed"), 
-       x = "Normalized Windspeed", 
+  labs(title = paste0("Average Rentals on ", paste0(params$day, "s"), " by Wind Speed"), 
+       x = "Normalized Wind Speed", 
        y = "Average Rentals") + 
   scale_size_continuous(name = "Number of Obs")
 ```
 
 ![](Saturday_files/figure-gfm/Wind-1.png)<!-- -->
 
-The correlation between windspeed and average rentals is -0.48637.
+The correlation between wind speed and average rentals is -0.48637.
 
 Be careful, correlation measures straight line relationships, so if the
 plot above shows a curved relationship, correlation may not be a useful
@@ -383,7 +386,7 @@ getSum <- function(varName, colName){
 
 ### Season
 
-Explore how bike rentals on saturdays change with the seasons using a
+Explore how bike rentals on Saturdays change with the seasons using a
 basic numeric summary and a boxplot. The numeric summary gives you an
 idea of center and spread. So does the boxplot, but it is better for
 identifying outliers.
@@ -415,7 +418,7 @@ ggplot(dayData, aes(x = season, y = cnt)) +
 ### Year
 
 Looking at total rentals each year gives us some idea of the long term
-trend in bike rentals on saturdays. It would be helpful to have data
+trend in bike rentals on Saturdays. It would be helpful to have data
 from more years, though.
 
 ``` r
@@ -433,7 +436,7 @@ yearSum %>% kable(col.names = c("Year", "Total Rentals"))
 
 ### Month
 
-Explore how bike rentals on saturdays change depending on the month
+Explore how bike rentals on Saturdays change depending on the month
 using a basic numeric summary and a boxplot. The numeric summary gives
 you an idea of center and spread. So does the boxplot, but it is better
 for identifying outliers.
@@ -472,7 +475,7 @@ ggplot(dayData, aes(x = mnth, y = cnt)) +
 
 ### Holiday
 
-Explore how bike rentals change depending on whether the saturday in
+Explore how bike rentals change depending on whether the Saturday in
 question is a holiday using a basic numeric summary and a boxplot. The
 numeric summary gives you an idea of center and spread. So does the
 boxplot, but it is better for identifying outliers.
@@ -480,7 +483,8 @@ boxplot, but it is better for identifying outliers.
 Note: There are no holidays on Saturday or Sunday because the holiday
 data has been extracted from the [Washington D.C. HR department’s
 holiday schedule](https://dchr.dc.gov/page/holiday-schedules), which
-only lists holidays that fall during the work week.
+only lists holidays that fall during the work week. Accordingly, I have
+left the *holiday* variable out of the models for Saturday and Sunday.
 
 ``` r
 getSum(varName = "holiday", colName = "Holiday")
@@ -531,7 +535,7 @@ ggplot(dayData, aes(x = workingday, y = cnt)) +
 
 ### Weather Condition
 
-Explore how bike rentals on saturdays change depending on the weather
+Explore how bike rentals on Saturdays change depending on the weather
 using a basic numeric summary and a boxplot. The numeric summary gives
 you an idea of center and spread. So does the boxplot, but it is better
 for identifying outliers.
@@ -628,11 +632,33 @@ test different values of *cp* to see which one performs best.
 
 I used the *caret* package to test 10 different values of *cp*.
 
+#### Formula
+
+As previously mentioned, *holiday* will be dropped from the models for
+Saturday and Sunday, but kept in the models for weekdays.
+
+``` r
+if(params$day == "Saturday" | params$day == "Sunday"){
+  form <- formula(cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed)
+} else if(params$day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")){
+  form <- formula(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed)
+} else{
+  stop("error")
+}
+
+form
+```
+
+    ## cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed
+    ## <environment: 0x00000120333253a0>
+
 #### Create the Model
+
+Train the non-ensemble tree model using the above formula.
 
 ``` r
 set.seed(123)
-tree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+tree <- train(form, 
               data = train, 
               method = "rpart", 
               trControl = trainControl(method = "LOOCV"), 
@@ -653,7 +679,7 @@ tree
     ## CART 
     ## 
     ## 1761 samples
-    ##    8 predictor
+    ##    7 predictor
     ## 
     ## No pre-processing
     ## Resampling: Leave-One-Out Cross-Validation 
@@ -727,6 +753,8 @@ parameters.
 
 #### Create the Model
 
+Train the boosted tree model using the same formula as above.
+
 ``` r
 tuneGr <- expand.grid(n.trees = seq(from = 50, to = 150, by = 50), 
                      interaction.depth = 1:3, 
@@ -734,7 +762,7 @@ tuneGr <- expand.grid(n.trees = seq(from = 50, to = 150, by = 50),
                      n.minobsinnode = 9:11)
 
 set.seed(123)
-boostTree <- train(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, 
+boostTree <- train(form, 
                    data = train, 
                    method = "gbm", 
                    trControl = trainControl(method = "cv", number = 10),
@@ -762,7 +790,7 @@ boostTree
     ## Stochastic Gradient Boosting 
     ## 
     ## 1761 samples
-    ##    8 predictor
+    ##    7 predictor
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
@@ -1077,4 +1105,4 @@ final$finalModel
 
     ## A gradient boosted model with gaussian loss function.
     ## 150 iterations were performed.
-    ## There were 20 predictors of which 17 had non-zero influence.
+    ## There were 19 predictors of which 17 had non-zero influence.
