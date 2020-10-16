@@ -63,7 +63,7 @@ My models use the following predictor variables:
       - pleasant: clear, few clouds, partly cloudy  
       - less pleasant: mist, mist + cloudy, mist + broken clouds, mist +
         few clouds  
-      - even less pleasant: light snow, light Rain + scattered clouds,
+      - even less pleasant: light snow, light rain + scattered clouds,
         light rain + thunderstorm + scattered clouds  
       - downright unpleasant: snow + fog, heavy rain + ice pallets +
         thunderstorm + mist  
@@ -72,7 +72,8 @@ My models use the following predictor variables:
   - *windspeed*: normalized wind speed
 
 You can return to the homepage for this project by clicking
-[here](README.md). The github repo for this project is
+[here](https://jkburrows.github.io/ST558-Project-2/). The github repo
+for this project is
 [here](https://github.com/JKBurrows/ST558-Project-2).
 
 # Read in Data
@@ -632,14 +633,15 @@ I used the *caret* package to test 10 different values of *cp*.
 
 #### Formula
 
-As previously mentioned, *holiday* will be dropped from the models for
-Saturday and Sunday, but kept in the models for weekdays.
+The formula that is used to build the models is below. As previously
+mentioned, *holiday* will be dropped from the models for Saturday and
+Sunday, but kept in the models for weekdays.
 
 ``` r
 if(params$day == "Saturday" | params$day == "Sunday"){
-  form <- formula(cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed)
+  form <- formula(cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed, showEnv = FALSE)
 } else if(params$day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")){
-  form <- formula(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed)
+  form <- formula(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, showEnv = FALSE)
 } else{
   stop("error")
 }
@@ -648,7 +650,7 @@ form
 ```
 
     ## cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed
-    ## <environment: 0x0000012018ba1a30>
+    ## <environment: 0x0000020a79048eb8>
 
 #### Create the Model
 

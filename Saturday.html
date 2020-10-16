@@ -673,14 +673,14 @@ body {
 <ul>
 <li>pleasant: clear, few clouds, partly cloudy</li>
 <li>less pleasant: mist, mist + cloudy, mist + broken clouds, mist + few clouds</li>
-<li>even less pleasant: light snow, light Rain + scattered clouds, light rain + thunderstorm + scattered clouds</li>
+<li>even less pleasant: light snow, light rain + scattered clouds, light rain + thunderstorm + scattered clouds</li>
 <li>downright unpleasant: snow + fog, heavy rain + ice pallets + thunderstorm + mist</li>
 </ul></li>
 <li><em>temp</em>: normalized temperature in celsius</li>
 <li><em>hum</em>: normalized humidity</li>
 <li><em>windspeed</em>: normalized wind speed</li>
 </ul>
-<p>You can return to the homepage for this project by clicking <a href="README.md">here</a>. The github repo for this project is <a href="https://github.com/JKBurrows/ST558-Project-2">here</a>.</p>
+<p>You can return to the homepage for this project by clicking <a href="https://jkburrows.github.io/ST558-Project-2/">here</a>. The github repo for this project is <a href="https://github.com/JKBurrows/ST558-Project-2">here</a>.</p>
 <h1 id="read-in-data">Read in Data</h1>
 <h2 id="get-bikes-data">Get Bikes Data</h2>
 <p>Read in data.</p>
@@ -1665,18 +1665,18 @@ body {
 <p>If we want to compare two different values of <em>cp</em>, we will go through the <em>LOOCV</em> process twice and compare the results. In this way, we can test different values of <em>cp</em> to see which one performs best.</p>
 <p>I used the <em>caret</em> package to test 10 different values of <em>cp</em>.</p>
 <h4 id="formula">Formula</h4>
-<p>As previously mentioned, <em>holiday</em> will be dropped from the models for Saturday and Sunday, but kept in the models for weekdays.</p>
+<p>The formula that is used to build the models is below. As previously mentioned, <em>holiday</em> will be dropped from the models for Saturday and Sunday, but kept in the models for weekdays.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="cf">if</span>(params<span class="op">$</span>day <span class="op">==</span><span class="st"> &quot;Saturday&quot;</span> <span class="op">|</span><span class="st"> </span>params<span class="op">$</span>day <span class="op">==</span><span class="st"> &quot;Sunday&quot;</span>){</span>
-<span id="cb23-2"><a href="#cb23-2"></a>  form &lt;-<span class="st"> </span><span class="kw">formula</span>(cnt <span class="op">~</span><span class="st"> </span>yr <span class="op">+</span><span class="st"> </span>mnth <span class="op">+</span><span class="st"> </span>hr <span class="op">+</span><span class="st"> </span>weathersit <span class="op">+</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>hum <span class="op">+</span><span class="st"> </span>windspeed)</span>
+<span id="cb23-2"><a href="#cb23-2"></a>  form &lt;-<span class="st"> </span><span class="kw">formula</span>(cnt <span class="op">~</span><span class="st"> </span>yr <span class="op">+</span><span class="st"> </span>mnth <span class="op">+</span><span class="st"> </span>hr <span class="op">+</span><span class="st"> </span>weathersit <span class="op">+</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>hum <span class="op">+</span><span class="st"> </span>windspeed, <span class="dt">showEnv =</span> <span class="ot">FALSE</span>)</span>
 <span id="cb23-3"><a href="#cb23-3"></a>} <span class="cf">else</span> <span class="cf">if</span>(params<span class="op">$</span>day <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Monday&quot;</span>, <span class="st">&quot;Tuesday&quot;</span>, <span class="st">&quot;Wednesday&quot;</span>, <span class="st">&quot;Thursday&quot;</span>, <span class="st">&quot;Friday&quot;</span>)){</span>
-<span id="cb23-4"><a href="#cb23-4"></a>  form &lt;-<span class="st"> </span><span class="kw">formula</span>(cnt <span class="op">~</span><span class="st"> </span>yr <span class="op">+</span><span class="st"> </span>mnth <span class="op">+</span><span class="st"> </span>hr <span class="op">+</span><span class="st"> </span>holiday <span class="op">+</span><span class="st"> </span>weathersit <span class="op">+</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>hum <span class="op">+</span><span class="st"> </span>windspeed)</span>
+<span id="cb23-4"><a href="#cb23-4"></a>  form &lt;-<span class="st"> </span><span class="kw">formula</span>(cnt <span class="op">~</span><span class="st"> </span>yr <span class="op">+</span><span class="st"> </span>mnth <span class="op">+</span><span class="st"> </span>hr <span class="op">+</span><span class="st"> </span>holiday <span class="op">+</span><span class="st"> </span>weathersit <span class="op">+</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>hum <span class="op">+</span><span class="st"> </span>windspeed, <span class="dt">showEnv =</span> <span class="ot">FALSE</span>)</span>
 <span id="cb23-5"><a href="#cb23-5"></a>} <span class="cf">else</span>{</span>
 <span id="cb23-6"><a href="#cb23-6"></a>  <span class="kw">stop</span>(<span class="st">&quot;error&quot;</span>)</span>
 <span id="cb23-7"><a href="#cb23-7"></a>}</span>
 <span id="cb23-8"><a href="#cb23-8"></a></span>
 <span id="cb23-9"><a href="#cb23-9"></a>form</span></code></pre></div>
 <pre><code>## cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed
-## &lt;environment: 0x00000120333253a0&gt;
+## &lt;environment: 0x0000020a0a83bb60&gt;
 </code></pre>
 <h4 id="create-the-model">Create the Model</h4>
 <p>Train the non-ensemble tree model using the above formula.</p>
