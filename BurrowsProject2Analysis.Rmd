@@ -50,7 +50,7 @@ You can return to the homepage for this project by clicking [here](https://jkbur
 Read in data. 
 
 ```{r Read}
-bikes <- read_csv(file = "../Bike-Sharing-Dataset/hour.csv")
+bikes <- read_csv(file = "hour.csv")
 
 bikes %>% head() %>% kable()
 ```
@@ -418,9 +418,9 @@ The formula that is used to build the models is below. As previously mentioned, 
 
 ```{r Formula}
 if(params$day == "Saturday" | params$day == "Sunday"){
-  form <- formula(cnt ~ yr + mnth + hr + weathersit + temp + hum + windspeed, showEnv = FALSE)
+  form <- formula(cnt ~ yr + mnth + hr + temp + hum + windspeed, showEnv = FALSE)
 } else if(params$day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")){
-  form <- formula(cnt ~ yr + mnth + hr + holiday + weathersit + temp + hum + windspeed, showEnv = FALSE)
+  form <- formula(cnt ~ yr + mnth + hr + holiday + temp + hum + windspeed, showEnv = FALSE)
 } else{
   stop("error")
 }
@@ -509,6 +509,16 @@ More information about this model is below.
 boostTree
 ```
 
+## Multiple Linear Regression
+
+### Training
+
+#### Create the Model
+```{r mlr}
+mlr <- lm(form, data = train)
+```
+
+
 # Test Models  
 
 I tested the models on the test set and selected the model that performed best. 
@@ -522,9 +532,13 @@ treeRMSE <- postResample(treePreds, test$cnt)[1]
 boostPreds <- predict(boostTree, test)
 boostRMSE <- postResample(boostPreds, test$cnt)[1]
 
-modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree"), 
-                               trainRMSE = c(min(tree$results$RMSE), min(boostTree$results$RMSE)), 
-                               testRMSE = c(treeRMSE, boostRMSE))
+mlrPreds <- predict(mlr, test)
+mlrRMSE <- postResample(mlrPreds, test$cnt)[1]
+
+modelPerformance <- data.frame(model = c("Non-Ensemble Tree", "Boosted Tree", "MLR"), 
+                               trainRMSE = c(min(tree$results$RMSE), min(boostTree$results$RMSE),
+                                             summary(mlr)$sigma), 
+                               testRMSE = c(treeRMSE, boostRMSE, mlrRMSE))
 
 modelPerformance %>% kable(col.names = c("Model", "Train RMSE", "Test RMSE"))
 ```
