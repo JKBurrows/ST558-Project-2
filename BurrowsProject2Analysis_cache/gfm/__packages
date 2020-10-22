@@ -1,4 +1,6 @@
 base
+knitr
+rmarkdown
 tidyverse
 ggplot2
 tibble
@@ -8,8 +10,6 @@ purrr
 dplyr
 stringr
 forcats
-rmarkdown
-knitr
 lattice
 caret
 corrplot

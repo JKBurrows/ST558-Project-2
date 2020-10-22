@@ -550,20 +550,23 @@ best <- modelPerformance %>% filter(testRMSE == min(testRMSE))
 worst <- modelPerformance %>% filter(testRMSE == max(testRMSE))
 ```
 
-The `r tolower(best$model)` performs better than the `r tolower(worst$model)` as judged by RMSE on the test set. 
+The `r tolower(best$model)` performs best as judged by RMSE on the test set. 
 
 The `r tolower(best$model)` model is saved to the `final` object below. 
 
 ```{r Final}
 if(best$model == "Non-Ensemble Tree"){
   final <- tree
+  final
 } else if(best$model == "Boosted Tree"){
   final <- boostTree
+  final$finalModel
+} else if(best$model == "MLR"){
+  final <- mlr
+  final
 } else{
   stop("Error")
 }
-
-final$finalModel
 ```
 
 
